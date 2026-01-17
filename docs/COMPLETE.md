@@ -173,10 +173,10 @@ Generic packages automatically support:
 ## Documentation
 
 - **README.md** - Main documentation
-- **GETTING_STARTED.md** - Quick start
-- **BUILD_GUIDE.md** - Build instructions
-- **PROJECT_SUMMARY.md** - Complete overview
-- **COMPLETE.md** - This file
+- **docs/GETTING_STARTED.md** - Quick start
+- **docs/BUILD_GUIDE.md** - Build instructions
+- **docs/PROJECT_SUMMARY.md** - Complete overview
+- **docs/COMPLETE.md** - This file
 
 ## Status
 

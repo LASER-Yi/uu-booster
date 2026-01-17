@@ -152,10 +152,10 @@ Interactive menu for quick access to common tasks.
 ### Documentation
 
 - **README.md** - Main project documentation
-- **GETTING_STARTED.md** - Quick start guide
-- **BUILD_GUIDE.md** - Detailed build instructions
-- **PROJECT_SUMMARY.md** - This file
-- **IMPLEMENTATION.md** - Implementation details
+- **docs/GETTING_STARTED.md** - Quick start guide
+- **docs/BUILD_GUIDE.md** - Detailed build instructions
+- **docs/PROJECT_SUMMARY.md** - This file
+- **docs/IMPLEMENTATION.md** - Implementation details
 
 ## Architecture Support
 

@@ -40,9 +40,9 @@ Test packages in an OpenWRT Docker container on any platform:
 
 Start here to understand the full project:
 
-1. **IMPLEMENTATION.md** - Complete summary of what was created
+1. **docs/IMPLEMENTATION.md** - Complete summary of what was created
 2. **README.md** - Main project documentation
-3. **BUILD_GUIDE.md** - Detailed build instructions
+3. **docs/BUILD_GUIDE.md** - Detailed build instructions
 
 ## What's Included
 
@@ -74,9 +74,9 @@ Start here to understand the full project:
 ### Documentation
 
 - **README.md** - Main guide
-- **BUILD_GUIDE.md** - Build instructions and troubleshooting
-- **PROJECT_SUMMARY.md** - Complete overview
-- **IMPLEMENTATION.md** - Implementation summary
+- **docs/BUILD_GUIDE.md** - Build instructions and troubleshooting
+- **docs/PROJECT_SUMMARY.md** - Complete overview
+- **docs/IMPLEMENTATION.md** - Implementation summary
 
 ## Architecture Support
 
@@ -91,7 +91,7 @@ When you install the package on your router, it automatically detects the archit
 
 ## Next Steps
 
-1. Read `IMPLEMENTATION.md` for a complete overview
+1. Read `docs/IMPLEMENTATION.md` for a complete overview
 2. Run `./scripts/quick-start.sh` for an interactive menu
 3. Build packages: `./scripts/build.sh`
 4. Test packages: `./scripts/test.sh x86_64`
@@ -99,9 +99,9 @@ When you install the package on your router, it automatically detects the archit
 
 ## Need Help?
 
-Check the documentation files:
-- `IMPLEMENTATION.md` - What was created
+Check documentation files:
+- `docs/IMPLEMENTATION.md` - What was created
 - `README.md` - Usage and installation
-- `BUILD_GUIDE.md` - Build troubleshooting
+- `docs/BUILD_GUIDE.md` - Build troubleshooting
 
 Happy building!

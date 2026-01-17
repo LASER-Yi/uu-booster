@@ -185,6 +185,14 @@ docker run --rm --platform linux/arm/v7 -v ./output:/tmp openwrt/rootfs:arm_cort
 
 This project is based on the UU Game Booster OpenWRT plugin reference implementation.
 
+## Documentation
+
+For detailed documentation, see:
+- [docs/BUILD_GUIDE.md](docs/BUILD_GUIDE.md) - Build instructions
+- [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md) - Quick start guide
+- [docs/PROJECT_SUMMARY.md](docs/PROJECT_SUMMARY.md) - Complete project overview
+- [docs/COMPLETE.md](docs/COMPLETE.md) - Implementation status
+
 ## References
 
 - [UU Game Booster](https://uu.163.com/)
