@@ -1,0 +1,54 @@
+version: "3"
+
+services:
+  builder:
+    image: openwrt/sdk:x86_64-generic-v22.03.7
+    container_name: uu-booster-builder
+    environment:
+      - CONFIG_AUTOREMOVE=y
+      - CONFIG_BUILD_LOG=n
+    volumes:
+      - "./packages:/packages:ro"
+      - "./output:/output"
+      - "./sdk:/builder"
+    working_dir: /builder
+    command: tail -f /dev/null
+    
+  builder-aarch64:
+    image: openwrt/sdk:aarch64-generic-v22.03.7
+    container_name: uu-booster-builder-aarch64
+    environment:
+      - CONFIG_AUTOREMOVE=y
+      - CONFIG_BUILD_LOG=n
+    volumes:
+      - "./packages:/packages:ro"
+      - "./output:/output"
+      - "./sdk-aarch64:/builder"
+    working_dir: /builder
+    command: tail -f /dev/null
+    
+  builder-arm:
+    image: openwrt/sdk:arm_cortex-a7_v22.03.7
+    container_name: uu-booster-builder-arm
+    environment:
+      - CONFIG_AUTOREMOVE=y
+      - CONFIG_BUILD_LOG=n
+    volumes:
+      - "./packages:/packages:ro"
+      - "./output:/output"
+      - "./sdk-arm:/builder"
+    working_dir: /builder
+    command: tail -f /dev/null
+    
+  builder-mipsel:
+    image: openwrt/sdk:mipsel_24kc-v22.03.7
+    container_name: uu-booster-builder-mipsel
+    environment:
+      - CONFIG_AUTOREMOVE=y
+      - CONFIG_BUILD_LOG=n
+    volumes:
+      - "./packages:/packages:ro"
+      - "./output:/output"
+      - "./sdk-mipsel:/builder"
+    working_dir: /builder
+    command: tail -f /dev/null

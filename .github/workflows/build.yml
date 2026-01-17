@@ -1,0 +1,114 @@
+name: Build UU Booster Packages
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+env:
+  SDK_VERSION: 22.03.7
+
+jobs:
+  build:
+    name: Build for ${{ matrix.arch }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - arch: x86_64
+            subtarget: generic
+            docker_platform: linux/amd64
+          - arch: aarch64
+            subtarget: generic
+            docker_platform: linux/arm64
+          - arch: arm
+            subtarget: cortex-a7
+            docker_platform: linux/arm/v7
+          - arch: mipsel
+            subtarget: 24kc
+            docker_platform: linux/mips
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+      with:
+        platforms: ${{ matrix.docker_platform }}
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Pull OpenWRT SDK
+      run: |
+        docker pull openwrt/sdk:${{ matrix.arch }}-${{ matrix.subtarget }}-v${{ env.SDK_VERSION }}
+
+    - name: Build uu-booster package
+      run: |
+        docker run --rm --platform ${{ matrix.docker_platform }} \
+          -v ${{ github.workspace }}/packages:/packages:ro \
+          -v ${{ github.workspace }}/output:/output \
+          -e TOPDIR=/builder \
+          openwrt/sdk:${{ matrix.arch }}-${{ matrix.subtarget }}-v${{ env.SDK_VERSION }} \
+          sh -c "
+            cp -r /packages/uu-booster /builder/package/ &&
+            ./scripts/feeds update -a &&
+            ./scripts/feeds install -a &&
+            make defconfig &&
+            make package/uu-booster/compile V=s IGNORE_ERRORS=1 &&
+            cp /builder/bin/packages/*/uu-booster_*.ipk /output/ 2>/dev/null || echo 'Package may not have been built'
+          "
+
+    - name: Build luci-app-uu-booster package
+      run: |
+        docker run --rm --platform ${{ matrix.docker_platform }} \
+          -v ${{ github.workspace }}/packages:/packages:ro \
+          -v ${{ github.workspace }}/output:/output \
+          -e TOPDIR=/builder \
+          openwrt/sdk:${{ matrix.arch }}-${{ matrix.subtarget }}-v${{ env.SDK_VERSION }} \
+          sh -c "
+            cp -r /packages/luci-app-uu-booster /builder/package/ &&
+            ./scripts/feeds update -a &&
+            ./scripts/feeds install -a &&
+            make defconfig &&
+            make package/luci-app-uu-booster/compile V=s IGNORE_ERRORS=1 &&
+            cp /builder/bin/packages/*/luci-app-uu-booster_*.ipk /output/ 2>/dev/null || echo 'Package may not have been built'
+          "
+
+    - name: List built packages
+      run: ls -lh output/ || echo "No packages found"
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: uu-booster-${{ matrix.arch }}
+        path: output/*.ipk
+        retention-days: 30
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: release
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: release/**/*
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

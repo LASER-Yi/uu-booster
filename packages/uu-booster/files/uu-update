@@ -1,0 +1,317 @@
+#!/bin/sh
+UU_UPDATE_VERSION="1.0.0"
+
+UU_UPDATE_CONFIG="/etc/uu-booster.conf"
+UU_UPDATE_BINARY_DIR="/usr/sbin/uu"
+UU_UPDATE_BINARY="uuplugin"
+UU_UPDATE_TEMP_DIR="/tmp/uu-booster-update-$(date +%s)"
+
+log_message() {
+	logger -t uu-update -p daemon.info "$1"
+	echo "$1"
+}
+
+error_exit() {
+	log_message "ERROR: $1"
+	exit 1
+}
+
+info_message() {
+	log_message "INFO: $1"
+}
+
+cleanup() {
+	if [ -d "$UU_UPDATE_TEMP_DIR" ]; then
+		rm -rf "$UU_UPDATE_TEMP_DIR" 2>/dev/null
+	fi
+}
+
+trap cleanup EXIT
+
+check_arch() {
+	local arch=$1
+	local uu_arch=""
+	
+	case "$arch" in
+		aarch64_*)
+			uu_arch="aarch64"
+			;;
+		arm_*)
+			uu_arch="arm"
+			;;
+		mips_*)
+			uu_arch="mipsel"
+			;;
+		x86_64)
+			uu_arch="x86_64"
+			;;
+		*)
+			error_exit "Unsupported architecture: $arch"
+			;;
+	esac
+	
+	echo "$uu_arch"
+}
+
+download_file() {
+	local url="$1"
+	local output="$2"
+	local expected_md5="$3"
+	local attempt_name="$4"
+	
+	info_message "Download attempt $attempt_name: $url"
+	
+	wget -q -O "$output" "$url"
+	
+	if [ $? -ne 0 ]; then
+		error_exit "Download failed (exit code: $?)"
+	fi
+	
+	if [ ! -f "$output" ]; then
+		error_exit "Downloaded file not found"
+	fi
+	
+	local file_size=$(stat -c%s "$output" 2>/dev/null)
+	if [ -z "$file_size" ] || [ "$file_size" -lt 1024 ]; then
+		error_exit "Downloaded file too small (${file_size:-0} bytes), possibly error page"
+	fi
+	
+	info_message "Downloaded file size: $file_size bytes"
+	
+	if [ -n "$expected_md5" ] && [ "$expected_md5" != "none" ]; then
+		local calculated_md5=$(md5sum "$output" | awk '{print $1}')
+		
+		if [ -z "$calculated_md5" ]; then
+			error_exit "Failed to calculate MD5 checksum"
+		fi
+		
+		info_message "MD5 Check:"
+		info_message "  Expected: $expected_md5"
+		info_message "  Calculated: $calculated_md5"
+		
+		if [ "$calculated_md5" = "$expected_md5" ]; then
+			info_message "MD5 checksum: OK"
+		else
+			error_exit "MD5 checksum mismatch!"
+		fi
+	else
+		info_message "MD5 validation skipped (no expected MD5 provided)"
+	fi
+	
+	return 0
+}
+
+extract_archive() {
+	local archive="$1"
+	
+	info_message "Extracting archive: $archive"
+	
+	tar -xzf "$archive" -C "$UU_UPDATE_TEMP_DIR"
+	
+	if [ $? -ne 0 ]; then
+		error_exit "Failed to extract archive"
+	fi
+	
+	if [ ! -f "$UU_UPDATE_TEMP_DIR/uu.conf" ]; then
+		error_exit "uu.conf not found in archive"
+	fi
+	
+	if [ ! -f "$UU_UPDATE_TEMP_DIR/uuplugin" ]; then
+		error_exit "uuplugin not found in archive"
+	fi
+	
+	return 0
+}
+
+install_files() {
+	info_message "Installing files to $UU_UPDATE_BINARY_DIR"
+	
+	mkdir -p "$UU_UPDATE_BINARY_DIR"
+	
+	cp "$UU_UPDATE_TEMP_DIR/uu.conf" "$UU_UPDATE_CONFIG"
+	
+	if [ $? -ne 0 ]; then
+		error_exit "Failed to copy uu.conf"
+	fi
+	
+	cp "$UU_UPDATE_TEMP_DIR/uuplugin" "$UU_UPDATE_BINARY_DIR/$UU_UPDATE_BINARY"
+	
+	if [ $? -ne 0 ]; then
+		error_exit "Failed to copy uuplugin"
+	fi
+	
+	chmod +x "$UU_UPDATE_BINARY_DIR/$UU_UPDATE_BINARY"
+	
+	info_message "Files installed successfully"
+}
+
+stop_service() {
+	if [ -f /etc/init.d/uu-booster ]; then
+		info_message "Stopping uu-booster service..."
+		/etc/init.d/uu-booster stop || true
+	fi
+}
+
+start_service() {
+	if [ -f /etc/init.d/uu-booster ]; then
+		info_message "Starting uu-booster service..."
+		/etc/init.d/uu-booster start || true
+	fi
+}
+
+restart_service() {
+	stop_service
+	start_service
+}
+
+main() {
+	echo "========================================="
+	echo "UU Booster Update Script v$UU_UPDATE_VERSION"
+	echo "========================================="
+	echo ""
+	
+	if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+		echo "Usage: $0 [command]"
+		echo ""
+		echo "Commands:"
+		echo "  check    - Check for updates (display current and latest versions)"
+		echo "  update    - Update to the latest version"
+		echo "  status    - Show service status"
+		echo "  restart   - Restart the service"
+		echo "  help      - Show this help message"
+		echo ""
+		exit 0
+	fi
+	
+	local arch=$(grep '^DISTRIB_ARCH' /etc/openwrt_release 2>/dev/null | awk -F "'" '{print $2}')
+	
+	if [ -z "$arch" ]; then
+		error_exit "Failed to detect architecture from /etc/openwrt_release"
+	fi
+	
+	local uu_arch=$(check_arch "$arch")
+	
+	if [ "$1" = "check" ]; then
+		echo "Checking for updates..."
+		echo ""
+		echo "Current architecture: $arch"
+		echo "UU architecture: $uu_arch"
+		echo ""
+		
+		info_message "Querying UU API for $uu_arch..."
+		
+		local api_response=$(curl -s "http://router.uu.163.com/api/plugin?type=openwrt-$uu_arch" 2>&1)
+		
+		if [ -z "$api_response" ]; then
+			error_exit "No response from UU API"
+		fi
+		
+		local expected_md5=$(echo "$api_response" | sed -n 's/.*"md5":"\([^"]*\)".*/\1/p' 2>/dev/null)
+		local download_url=$(echo "$api_response" | sed -n 's/.*"url":"\([^"]*\)".*/\1/p' 2>/dev/null)
+		
+		if [ -z "$download_url" ]; then
+			error_exit "Failed to extract download URL from API response"
+		fi
+		
+		echo "Latest download URL: ${download_url:0:80}..."
+		
+		if [ -n "$expected_md5" ]; then
+			echo "Expected MD5: ${expected_md5:0:32}..."
+		else
+			echo "Expected MD5: not available"
+		fi
+		
+		echo ""
+		echo "To install the latest version, run:"
+		echo "  $0 update"
+		echo ""
+		exit 0
+	fi
+	
+	if [ "$1" = "status" ]; then
+		if [ -f /etc/init.d/uu-booster ]; then
+			echo "Service status:"
+			/etc/init.d/uu-booster status
+		else
+			echo "Service not installed"
+		fi
+		exit 0
+	fi
+	
+	if [ "$1" = "restart" ]; then
+		restart_service
+		echo "Service restarted"
+		exit 0
+	fi
+	
+	if [ "$1" != "update" ]; then
+		echo "Unknown command: $1"
+		echo "Use '$0 --help' for usage information"
+		exit 1
+	fi
+	
+	echo "Updating UU Booster..."
+	echo ""
+	
+	info_message "Querying UU API for $uu_arch..."
+	
+	local api_response=$(curl -s "http://router.uu.163.com/api/plugin?type=openwrt-$uu_arch" 2>&1)
+	
+	if [ -z "$api_response" ]; then
+		error_exit "No response from UU API"
+	fi
+	
+	local expected_md5=$(echo "$api_response" | sed -n 's/.*"md5":"\([^"]*\)".*/\1/p' 2>/dev/null)
+	local download_url=$(echo "$api_response" | sed -n 's/.*"url":"\([^"]*\)".*/\1/p' 2>/dev/null)
+	local download_url_bak=$(echo "$api_response" | sed -n 's/.*"url_bak":"\([^"]*\)".*/\1/p' 2>/dev/null)
+	
+	if [ -z "$download_url" ]; then
+		error_exit "Failed to extract download URL from API response"
+	fi
+	
+	if [ -z "$expected_md5" ]; then
+		info_message "MD5 validation not available, proceeding without checksum"
+	fi
+	
+	mkdir -p "$UU_UPDATE_TEMP_DIR"
+	
+	local archive_file="$UU_UPDATE_TEMP_DIR/uu-booster.tar.gz"
+	
+	if download_file "$download_url" "$archive_file" "$expected_md5" "primary"; then
+		info_message "Download successful from primary URL"
+	else
+		if [ -n "$download_url_bak" ]; then
+			error_exit "Primary download failed and no backup URL available"
+		else
+			info_message "Primary URL failed, trying backup URL..."
+			
+			if download_file "$download_url_bak" "$archive_file" "$expected_md5" "backup"; then
+				info_message "Download successful from backup URL"
+			else
+				error_exit "Both primary and backup downloads failed"
+			fi
+		fi
+	fi
+	
+	if extract_archive "$archive_file"; then
+		if install_files; then
+			stop_service
+			start_service
+			
+			echo ""
+			echo "========================================="
+			echo "Update completed successfully!"
+			echo "========================================="
+			echo ""
+			echo "Service has been restarted"
+			echo ""
+			exit 0
+		else
+			error_exit "Failed to install files"
+		fi
+	else
+		error_exit "Failed to extract archive"
+	fi
+}
+
+main "$@"

@@ -1,0 +1,7 @@
+Package: uu-booster
+Version: 1.0.0-1
+Architecture: all
+Maintainer: UU Booster Team
+Depends: kmod-tun
+Source: https://uu.163.com/
+Description: UU game booster OpenWRT plugin - manages and accelerates gaming traffic

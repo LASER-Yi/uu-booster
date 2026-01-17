@@ -1,0 +1,6 @@
+*.ipk
+output/
+sdk/
+sdk-*/
+*.log
+.DS_Store

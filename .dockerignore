@@ -1,0 +1,9 @@
+output/
+sdk/
+sdk-*/
+*.ipk
+.git/
+.gitignore
+README.md
+.github/
+scripts/
