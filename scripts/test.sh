@@ -13,7 +13,8 @@ usage() {
 	echo "  arm           Test with arm rootfs (requires QEMU)"
 	echo "  mipsel        Test with mipsel rootfs (requires QEMU)"
 	echo ""
-	echo "Note: Non-x86_64 architectures require QEMU support"
+	echo "Note: Packages are architecture-independent (_all.ipk)"
+	echo "      This only controls which OpenWRT rootfs to test with"
 	exit 1
 }
 
@@ -48,20 +49,20 @@ esac
 
 echo ""
 echo "========================================="
-echo "Testing packages for $ARCH"
+echo "Testing packages on $ARCH rootfs"
 echo "========================================="
 
 if [ ! -d "$PROJECT_ROOT/output" ]; then
 	echo "Error: No packages found in output/ directory"
-	echo "Please build packages first using: ./scripts/build.sh $ARCH"
+	echo "Please build packages first using: ./scripts/build.sh"
 	exit 1
 fi
 
-UU_PACKAGE=$(ls "$PROJECT_ROOT/output"/uu-booster_*$ARCH*.ipk 2>/dev/null | head -1)
+UU_PACKAGE=$(ls "$PROJECT_ROOT/output"/uu-booster_*_all.ipk 2>/dev/null | head -1)
 LUCI_PACKAGE=$(ls "$PROJECT_ROOT/output"/luci-app-uu-booster_*.ipk 2>/dev/null | head -1)
 
 if [ -z "$UU_PACKAGE" ]; then
-	echo "Error: uu-booster package not found for $ARCH"
+	echo "Error: uu-booster package not found"
 	exit 1
 fi
 
@@ -103,8 +104,8 @@ echo ""
 echo "Verifying installation..."
 
 echo "Checking binary:"
-if [ -f /usr/sbin/uu/uu-booster ]; then
-	/usr/sbin/uu/uu-booster --version 2>/dev/null || echo "Binary exists"
+if [ -f /usr/sbin/uu/uuplugin ]; then
+	/usr/sbin/uu/uuplugin --version 2>/dev/null || echo "Binary exists"
 else
 	echo "ERROR: Binary not found!"
 	exit 1

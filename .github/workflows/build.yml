@@ -12,47 +12,27 @@ env:
 
 jobs:
   build:
-    name: Build for ${{ matrix.arch }}
+    name: Build generic packages
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - arch: x86_64
-            subtarget: generic
-            docker_platform: linux/amd64
-          - arch: aarch64
-            subtarget: generic
-            docker_platform: linux/arm64
-          - arch: arm
-            subtarget: cortex-a7
-            docker_platform: linux/arm/v7
-          - arch: mipsel
-            subtarget: 24kc
-            docker_platform: linux/mips
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v3
-      with:
-        platforms: ${{ matrix.docker_platform }}
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
     - name: Pull OpenWRT SDK
       run: |
-        docker pull openwrt/sdk:${{ matrix.arch }}-${{ matrix.subtarget }}-v${{ env.SDK_VERSION }}
+        docker pull openwrt/sdk:x86_64-generic-v${{ env.SDK_VERSION }}
 
     - name: Build uu-booster package
       run: |
-        docker run --rm --platform ${{ matrix.docker_platform }} \
+        docker run --rm \
           -v ${{ github.workspace }}/packages:/packages:ro \
           -v ${{ github.workspace }}/output:/output \
           -e TOPDIR=/builder \
-          openwrt/sdk:${{ matrix.arch }}-${{ matrix.subtarget }}-v${{ env.SDK_VERSION }} \
+          openwrt/sdk:x86_64-generic-v${{ env.SDK_VERSION }} \
           sh -c "
             cp -r /packages/uu-booster /builder/package/ &&
             ./scripts/feeds update -a &&
@@ -64,11 +44,11 @@ jobs:
 
     - name: Build luci-app-uu-booster package
       run: |
-        docker run --rm --platform ${{ matrix.docker_platform }} \
+        docker run --rm \
           -v ${{ github.workspace }}/packages:/packages:ro \
           -v ${{ github.workspace }}/output:/output \
           -e TOPDIR=/builder \
-          openwrt/sdk:${{ matrix.arch }}-${{ matrix.subtarget }}-v${{ env.SDK_VERSION }} \
+          openwrt/sdk:x86_64-generic-v${{ env.SDK_VERSION }} \
           sh -c "
             cp -r /packages/luci-app-uu-booster /builder/package/ &&
             ./scripts/feeds update -a &&
@@ -84,7 +64,7 @@ jobs:
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: uu-booster-${{ matrix.arch }}
+        name: uu-booster
         path: output/*.ipk
         retention-days: 30
 
@@ -100,7 +80,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Download all artifacts
+    - name: Download artifacts
       uses: actions/download-artifact@v4
       with:
         path: release
@@ -108,7 +88,7 @@ jobs:
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
-        files: release/**/*
+        files: release/**/*.ipk
         generate_release_notes: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
