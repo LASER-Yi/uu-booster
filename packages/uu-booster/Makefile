@@ -31,6 +31,7 @@ endef
 
  define Package/uu-booster/install
 	$(INSTALL_DIR) $(1)/etc/init.d
+	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_DIR) $(1)/usr/sbin
 	$(INSTALL_DIR) $(1)/usr/sbin/uu
 	$(INSTALL_BIN) ./files/uu-booster.init $(1)/etc/init.d/uu-booster
