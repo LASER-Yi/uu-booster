@@ -2,7 +2,7 @@ version: "3"
 
 services:
   builder:
-    image: openwrt/sdk:x86_64-generic-v22.03.7
+    image: openwrt/sdk:x86-64-22.03.7
     container_name: uu-booster-builder
     environment:
       - CONFIG_AUTOREMOVE=y

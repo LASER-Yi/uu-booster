@@ -165,7 +165,7 @@ docker run --rm --platform linux/arm/v7 -v ./output:/tmp openwrt/rootfs:arm_cort
 ### Build Fails
 
 1. Ensure Docker is installed and running
-2. Check that the SDK image pulls successfully: `docker pull openwrt/sdk:x86_64-generic-v22.03.7`
+2. Check that the SDK image pulls successfully: `docker pull openwrt/sdk:x86-64-22.03.7`
 3. Verify package files exist in `packages/` directory
 
 ### Download Fails

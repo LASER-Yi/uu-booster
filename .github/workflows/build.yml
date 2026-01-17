@@ -24,7 +24,7 @@ jobs:
 
     - name: Pull OpenWRT SDK
       run: |
-        docker pull openwrt/sdk:x86_64-generic-v${{ env.SDK_VERSION }}
+        docker pull openwrt/sdk:x86-64-${{ env.SDK_VERSION }}
 
     - name: Build uu-booster package
       run: |
@@ -32,7 +32,7 @@ jobs:
           -v ${{ github.workspace }}/packages:/packages:ro \
           -v ${{ github.workspace }}/output:/output \
           -e TOPDIR=/builder \
-          openwrt/sdk:x86_64-generic-v${{ env.SDK_VERSION }} \
+          openwrt/sdk:x86-64-${{ env.SDK_VERSION }} \
           sh -c "
             cp -r /packages/uu-booster /builder/package/ &&
             ./scripts/feeds update -a &&
@@ -48,7 +48,7 @@ jobs:
           -v ${{ github.workspace }}/packages:/packages:ro \
           -v ${{ github.workspace }}/output:/output \
           -e TOPDIR=/builder \
-          openwrt/sdk:x86_64-generic-v${{ env.SDK_VERSION }} \
+          openwrt/sdk:x86-64-${{ env.SDK_VERSION }} \
           sh -c "
             cp -r /packages/luci-app-uu-booster /builder/package/ &&
             ./scripts/feeds update -a &&

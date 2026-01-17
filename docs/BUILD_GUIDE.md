@@ -27,7 +27,7 @@ Output:
 =========================================
 Building generic packages
 =========================================
-Pulling SDK image: openwrt/sdk:x86_64-generic-v22.03.7
+Pulling SDK image: openwrt/sdk:x86-64-22.03.7
 Building uu-booster package...
 Building luci-app-uu-booster package...
 
@@ -180,7 +180,7 @@ docker ps
 ping -c 3 downloads.openwrt.org
 
 # Pull manually first
-docker pull openwrt/sdk:x86_64-generic-v22.03.7
+docker pull openwrt/sdk:x86-64-22.03.7
 ```
 
 **Problem:** Build fails with permission errors
@@ -257,7 +257,7 @@ Edit `docker-compose.yml`:
 ```yaml
 services:
   builder:
-    image: openwrt/sdk:x86_64-generic-v23.05.0
+    image: openwrt/sdk:x86-64-23.05.0
 ```
 
 ### Custom Build Options
@@ -323,7 +323,7 @@ docker run --rm \
   -v "$PROJECT_ROOT/packages:/packages:ro" \
   -v "$PROJECT_ROOT/output:/output" \
   -e TOPDIR=/builder \
-  openwrt/sdk:x86_64-generic-v22.03.7 \
+  openwrt/sdk:x86-64-22.03.7 \
   sh -c "make package/uu-booster/compile V=sc"
 
 # Check build logs

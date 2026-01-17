@@ -226,7 +226,7 @@ Built packages are in: ./output
 | aarch64      | generic     | openwrt-aarch64   | aarch64-generic-v22.03.7 |
 | arm           | cortex-a7   | openwrt-arm       | arm_cortex-a7_v22.03.7 |
 | mipsel        | 24kc        | openwrt-mipsel    | mipsel_24kc-v22.03.7 |
-| x86_64        | generic     | openwrt-x86_64    | x86_64-generic-v22.03.7 |
+| x86_64        | generic     | openwrt-x86_64    | x86-64-22.03.7 |
 
 ---
 

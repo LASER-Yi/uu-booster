@@ -4,7 +4,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 SDK_VERSION="22.03.7"
-SDK_IMAGE="openwrt/sdk:x86_64-generic-v${SDK_VERSION}"
+SDK_IMAGE="openwrt/sdk:x86-64-${SDK_VERSION}"
 
 usage() {
 	echo "Usage: $0 [architecture]"
