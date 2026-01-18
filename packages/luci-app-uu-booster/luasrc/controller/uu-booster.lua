@@ -90,8 +90,8 @@ function action_update()
 		return
 	end
 	
-	local update_output = luci.sys.exec("/usr/bin/uu-update update 2>&1")
-	local update_result = luci.sys.call("/usr/bin/uu-update update >/dev/null 2>&1")
+	local update_output = luci.sys.exec("/usr/bin/uu update 2>&1")
+	local update_result = luci.sys.call("/usr/bin/uu update >/dev/null 2>&1")
 	
 	if update_result == 0 then
 		result.success = true
