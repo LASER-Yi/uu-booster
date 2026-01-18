@@ -18,7 +18,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - arch: x86_64-22.03.7
+          - arch: x86_64
+            sdk: 22.03.7
             target: generic
 
     steps:
@@ -28,8 +29,9 @@ jobs:
     - name: Build packages with OpenWRT SDK
       uses: openwrt/gh-action-sdk@v10
       env:
-        ARCH: ${{ matrix.arch }}
+        ARCH: ${{ matrix.arch }}-$${{ matrix.sdk }}
         PACKAGES: uu-booster luci-app-uu-booster
+        MAKEFLAGS: -j$(nproc)
         V: s
 
     - name: Verify build output
@@ -43,15 +45,13 @@ jobs:
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: uu-booster
-        path: bin/packages/**/*.ipk
-        retention-days: 30
-        if-no-files-found: error
+        name: ${{ matrix.arch }}-${{ matrix.sdk }}
+        path: bin/packages/${{ matrix.arch }}/packages_ci/*
 
     - name: Store logs
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ matrix.arch}}-logs
+        name: ${{ matrix.arch }}-${{ matrix.sdk }}-logs
         path: logs/
 
   release:
