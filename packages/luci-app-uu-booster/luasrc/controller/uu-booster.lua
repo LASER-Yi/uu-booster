@@ -146,8 +146,8 @@ function action_update()
 function action_status()
 	local current_version = ""
 	
-	if luci.fs.access("/etc/uu-booster.conf") then
-		local conf_content = luci.fs.readfile("/etc/uu-booster.conf")
+	if luci.fs.access("/usr/sbin/uu/uu.conf") then
+		local conf_content = luci.fs.readfile("/usr/sbin/uu/uu.conf")
 		current_version = conf_content:match("version=([%d%.]+)")
 	end
 	

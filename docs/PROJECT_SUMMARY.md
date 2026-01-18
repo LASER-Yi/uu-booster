@@ -39,7 +39,7 @@ This project provides OpenWRT packages for managing and monitoring UU Game Boost
 
 **Features:**
 - Menu entry: Services → UU Booster
-- Display current version (from `/etc/uu-booster.conf`)
+- Display current version (from `/usr/sbin/uu/uu.conf`)
 - Display latest version (extracted from UU API URL)
 - One-click check for updates
 - One-click update button
@@ -284,7 +284,7 @@ logread | grep uu-booster
 logread -e uu-booster
 
 # Manually test binary
-/usr/sbin/uu/uuplugin /etc/uu-booster.conf
+/usr/sbin/uu/uuplugin /usr/sbin/uu/uu.conf
 ```
 
 ## Contributing

@@ -217,10 +217,10 @@ ls -la /usr/sbin/uu/uuplugin
 file /usr/sbin/uu/uuplugin
 
 # Check config file
-cat /etc/uu-booster.conf
+cat /usr/sbin/uu/uu.conf
 
 # Manually test binary
-/usr/sbin/uu/uuplugin /etc/uu-booster.conf
+/usr/sbin/uu/uuplugin /usr/sbin/uu/uu.conf
 ```
 
 ## Advanced Usage

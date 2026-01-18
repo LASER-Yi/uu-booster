@@ -113,9 +113,9 @@ fi
 
 echo ""
 echo "Checking config:"
-if [ -f /etc/uu-booster.conf ]; then
+if [ -f /usr/sbin/uu/uu.conf ]; then
 	echo "Config file exists:"
-	cat /etc/uu-booster.conf
+	cat /usr/sbin/uu/uu.conf
 else
 	echo "ERROR: Config file not found!"
 	exit 1

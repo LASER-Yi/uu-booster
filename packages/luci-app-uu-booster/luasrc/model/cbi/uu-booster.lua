@@ -8,8 +8,8 @@ s.addremove = false
 s.anonymous = true
 
 current_version = ""
-if nixio.fs.access("/etc/uu-booster.conf") then
-	local f = io.popen("cat /etc/uu-booster.conf")
+if nixio.fs.access("/usr/sbin/uu/uu.conf") then
+	local f = io.popen("cat /usr/sbin/uu/uu.conf")
 	local content = f:read("*a")
 	f:close()
 	current_version = content:match("version=([%d%.]+)") or "Unknown"

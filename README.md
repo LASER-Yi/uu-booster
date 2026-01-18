@@ -141,7 +141,7 @@ The package automatically detects the router's architecture and downloads the ap
 
 1. Check logs: `logread | grep uu-booster`
 2. Verify binary exists: `ls -la /usr/sbin/uu/uuplugin`
-3. Check config file: `cat /etc/uu-booster.conf`
+3. Check config file: `cat /usr/sbin/uu/uu.conf`
 4. Ensure tun module is loaded: `lsmod | grep tun`
 
 ## Documentation
