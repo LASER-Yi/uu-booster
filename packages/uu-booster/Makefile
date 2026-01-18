@@ -11,8 +11,8 @@ define Package/uu-booster
   CATEGORY:=Network
   TITLE:=UU Game Booster
   DEPENDS:=+kmod-tun
-  MAINTAINER:=UU Booster Team
-  URL:=https://uu.163.com/
+  MAINTAINER:=LASER-Yi
+  URL:=https://github.com/LASER-Yi/uu-booster
   PKGARCH:=all
 endef
 
