@@ -14,23 +14,21 @@ jobs:
   build:
     name: Build generic packages
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64-22.03.7
+            target: generic
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Cache OpenWRT feeds
-      uses: actions/cache@v4
-      with:
-        path: feeds/
-        key: feeds-${{ runner.os }}-22.03.7-${{ hashFiles('feeds.conf.default') }}
-        restore-keys: |
-          feeds-${{ runner.os }}-22.03.7-
-
     - name: Build packages with OpenWRT SDK
       uses: openwrt/gh-action-sdk@v10
       env:
-        ARCH: x86_64-22.03.7
+        ARCH: ${{ matrix.arch }}
         PACKAGES: uu-booster luci-app-uu-booster
         V: s
 
@@ -49,6 +47,12 @@ jobs:
         path: bin/packages/**/*.ipk
         retention-days: 30
         if-no-files-found: error
+
+    - name: Store logs
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.arch}}-logs
+        path: logs/
 
   release:
     name: Create Release
