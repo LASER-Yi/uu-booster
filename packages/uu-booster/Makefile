@@ -32,7 +32,7 @@ define Package/uu-booster/install
 	$(INSTALL_DIR) $(1)/usr/sbin
 	$(INSTALL_DIR) $(1)/usr/sbin/uu
 	$(INSTALL_BIN) ./files/uu-booster.init $(1)/etc/init.d/uu-booster
-	$(INSTALL_BIN) ./files/uu-update $(1)/usr/bin/uu-update
+	$(INSTALL_BIN) ./files/uu $(1)/usr/bin/uu
  endef
 
 define Package/uu-booster/postinst

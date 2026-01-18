@@ -6,7 +6,7 @@ UU_UPDATE_BINARY="uuplugin"
 UU_UPDATE_TEMP_DIR="/tmp/uu-booster-update-$(date +%s)"
 
 log_message() {
-	logger -t uu-update -p daemon.info "$1"
+	logger -t uu -p daemon.info "$1"
 	echo "$1"
 }
 
@@ -151,7 +151,7 @@ restart_service() {
 
 main() {
 	echo "========================================="
-	echo "UU Booster Update Script v$UU_UPDATE_VERSION"
+	echo "UU Booster Script v$UU_UPDATE_VERSION"
 	echo "========================================="
 	echo ""
 	
