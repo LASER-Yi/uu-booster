@@ -70,7 +70,7 @@ download_file() {
 		error_exit "Downloaded file not found"
 	fi
 	
-	local file_size=$(stat -c%s "$output" 2>/dev/null)
+	local file_size=$(wc -c "$output" 2>/dev/null | awk '{print $1}')
 	if [ -z "$file_size" ] || [ "$file_size" -lt 1024 ]; then
 		error_exit "Downloaded file too small (${file_size:-0} bytes), possibly error page"
 	fi
