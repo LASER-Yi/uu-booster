@@ -26,8 +26,13 @@ jobs:
     - name: Build packages
       run: ./scripts/build.sh
 
-    - name: List built packages
-      run: ls -lh output/ || echo "No packages found"
+    - name: Verify build output
+      run: |
+        if [ ! -d "output" ] || [ -z "$(ls -A output/*.ipk 2>/dev/null)" ]; then
+          echo "Error: No packages found in output directory!"
+          exit 1
+        fi
+        ls -lh output/
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
@@ -35,6 +40,7 @@ jobs:
         name: uu-booster
         path: output/*.ipk
         retention-days: 30
+        if-no-files-found: error
 
   release:
     name: Create Release

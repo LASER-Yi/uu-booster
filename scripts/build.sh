@@ -42,8 +42,8 @@ docker run --rm \
 		./scripts/feeds update -a
 		./scripts/feeds install -a
 		make defconfig
-		make packages/uu-booster/compile V=s IGNORE_ERRORS=1
-		make packages/luci-app-uu-booster/compile V=s IGNORE_ERRORS=1
+		make packages/uu-booster/compile V=s
+		make packages/luci-app-uu-booster/compile V=s
 		for pkg in /builder/bin/packages/*/*.ipk; do
 			cp \"\$pkg\" /output/ 2>/dev/null || true
 		done
