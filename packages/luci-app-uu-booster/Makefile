@@ -4,6 +4,8 @@ LUCI_TITLE:=UU Game Booster
 LUCI_DEPENDS:=+uu-booster
 LUCI_PKGARCH:=all
 
+include ../../luci.mk
+
 define Package/luci-app-uu-booster/postinst
 #!/bin/sh
 	[ -n "$$IPKG_INSTROOT" ] || exit 0
