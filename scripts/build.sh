@@ -35,15 +35,15 @@ fi
 mkdir -p "$PROJECT_ROOT/output"
 
 docker run --rm \
-	-v "$PROJECT_ROOT/packages:/packages:ro" \
+	-v "$PROJECT_ROOT/packages:/builder/packages:ro" \
 	-v "$PROJECT_ROOT/output:/output" \
 	-e "TOPDIR=/builder" \
 	"$SDK_IMAGE" /bin/sh -c "
 		./scripts/feeds update -a
 		./scripts/feeds install -a
 		make defconfig
-		make package/uu-booster/compile V=s IGNORE_ERRORS=1
-		make package/luci-app-uu-booster/compile V=s IGNORE_ERRORS=1
+		make packages/uu-booster/compile V=s IGNORE_ERRORS=1
+		make packages/luci-app-uu-booster/compile V=s IGNORE_ERRORS=1
 		for pkg in /builder/bin/packages/*/*.ipk; do
 			cp \"\$pkg\" /output/ 2>/dev/null || true
 		done
