@@ -70,22 +70,9 @@ uu-booster_1.0.0-1_all.ipk
 luci-app-uu-booster_1.0.0-1_all.ipk
 ```
 
-#### Option 2: Docker Compose
-**Location:** `docker-compose.yml`
+---
 
-**Features:**
-- Single builder container (x86_64 SDK)
-- Persistent volume mounts for SDK caching
-- Manual build commands via `docker-compose exec`
-
-**Usage:**
-```bash
-docker-compose up -d                                    # Start container
-docker-compose exec builder sh -c "make package/uu-booster/compile"  # Build
-docker-compose down                                      # Stop container
-```
-
-#### Option 3: GitHub Actions
+#### Option 2: GitHub Actions
 **Location:** `.github/workflows/build.yml`
 
 **Features:**
@@ -226,7 +213,6 @@ uu-booster/
 │   └── test-api.sh         # API testing
 ├── .github/workflows/
 │   └── build.yml           # GitHub Actions workflow
-├── docker-compose.yml       # Docker Compose builder
 ├── README.md              # Main documentation
 ├── GETTING_STARTED.md     # Quick start guide
 ├── BUILD_GUIDE.md        # Build instructions

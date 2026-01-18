@@ -42,41 +42,7 @@ Built packages are in: ./output
 
 **Note:** Packages are architecture-independent (`_all.ipk`). The UU booster binary is automatically downloaded at install-time based on the router's detected architecture.
 
-## Method 2: Docker Compose
-
-### Start Builder Container
-
-```bash
-docker-compose up -d
-```
-
-This starts a single builder container using x86_64 SDK.
-
-### Build Using Docker Compose
-
-```bash
-# Build uu-booster package
-docker-compose exec builder sh -c "
-  cp -r /packages/uu-booster /builder/package/ &&
-  make package/uu-booster/compile V=s &&
-  cp /builder/bin/packages/*/uu-booster_*.ipk /output/
-"
-
-# Build luci-app-uu-booster package
-docker-compose exec builder sh -c "
-  cp -r /packages/luci-app-uu-booster /builder/package/ &&
-  make package/luci-app-uu-booster/compile V=s &&
-  cp /builder/bin/packages/*/luci-app-uu-booster_*.ipk /output/
-"
-```
-
-### Stop Builder Container
-
-```bash
-docker-compose down
-```
-
-## Method 3: GitHub Actions
+## Method 2: GitHub Actions
 
 ### Automatic Builds
 

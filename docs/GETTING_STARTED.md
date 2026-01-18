@@ -65,7 +65,6 @@ Start here to understand the full project:
 - **test.sh** - Test packages on any OpenWRT rootfs
 - **quick-start.sh** - Interactive menu
 - **validate.sh** - Validate all project files
-- **docker-compose.yml** - Docker Compose builder setup
 
 ### CI/CD
 

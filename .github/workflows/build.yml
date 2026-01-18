@@ -19,75 +19,12 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Cache OpenWRT feeds
-      uses: actions/cache@v4
-      with:
-        path: feeds-cache
-        key: ${{ runner.os }}-openwrt-feeds-${{ env.SDK_VERSION }}-${{ hashFiles('packages/**/Makefile') }}
-        restore-keys: |
-          ${{ runner.os }}-openwrt-feeds-${{ env.SDK_VERSION }}-
-
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-
-    - name: Pull OpenWRT SDK
+    - name: Set up Docker
       run: |
-        docker pull openwrt/sdk:x86-64-${{ env.SDK_VERSION }}
+        docker --version
 
-    - name: Create cache directory
-      run: mkdir -p feeds-cache
-
-    - name: Build uu-booster package
-      run: |
-        docker run --rm \
-          -v ${{ github.workspace }}/packages:/packages:ro \
-          -v ${{ github.workspace }}/output:/output \
-          -v ${{ github.workspace }}/feeds-cache:/builder/feeds-cache \
-          -e TOPDIR=/builder \
-          openwrt/sdk:x86-64-${{ env.SDK_VERSION }} \
-          sh -c "
-            if [ -d /builder/feeds-cache ]; then
-              echo 'Restoring cached feeds...'
-              cp -r /builder/feeds-cache/* /feeds/ 2>/dev/null || true
-            fi
-            if [ ! -d /feeds/luci ] || [ ! -d /feeds/packages ]; then
-              echo 'Updating feeds...'
-              ./scripts/feeds update -a
-              ./scripts/feeds install -a
-            fi
-            echo 'Saving feeds to cache...'
-            cp -r /feeds/* /builder/feeds-cache/ 2>/dev/null || true
-            cp -r /packages/uu-booster /builder/package/ &&
-            make defconfig &&
-            make package/uu-booster/compile V=s IGNORE_ERRORS=1 &&
-            cp /builder/bin/packages/*/uu-booster_*.ipk /output/ 2>/dev/null || echo 'Package may not have been built'
-          "
-
-    - name: Build luci-app-uu-booster package
-      run: |
-        docker run --rm \
-          -v ${{ github.workspace }}/packages:/packages:ro \
-          -v ${{ github.workspace }}/output:/output \
-          -v ${{ github.workspace }}/feeds-cache:/builder/feeds-cache \
-          -e TOPDIR=/builder \
-          openwrt/sdk:x86-64-${{ env.SDK_VERSION }} \
-          sh -c "
-            if [ -d /builder/feeds-cache ]; then
-              echo 'Restoring cached feeds...'
-              cp -r /builder/feeds-cache/* /feeds/ 2>/dev/null || true
-            fi
-            if [ ! -d /feeds/luci ] || [ ! -d /feeds/packages ]; then
-              echo 'Updating feeds...'
-              ./scripts/feeds update -a
-              ./scripts/feeds install -a
-            fi
-            echo 'Saving feeds to cache...'
-            cp -r /feeds/* /builder/feeds-cache/ 2>/dev/null || true
-            cp -r /packages/luci-app-uu-booster /builder/package/ &&
-            make defconfig &&
-            make package/luci-app-uu-booster/compile V=s IGNORE_ERRORS=1 &&
-            cp /builder/bin/packages/*/luci-app-uu-booster_*.ipk /output/ 2>/dev/null || echo 'Package may not have been built'
-          "
+    - name: Build packages
+      run: ./scripts/build.sh
 
     - name: List built packages
       run: ls -lh output/ || echo "No packages found"

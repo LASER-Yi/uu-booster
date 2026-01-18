@@ -20,6 +20,7 @@ OpenWRT package for managing and monitoring UU Game Booster with LuCI web interf
 │   │   └── files/
 │   │       ├── control
 │   │       ├── uu-booster.init
+│   │       ├── uu-update
 │   │       └── (postinst, postrm in Makefile)
 │   └── luci-app-uu-booster/      # LuCI interface
 │       ├── Makefile
@@ -31,65 +32,39 @@ OpenWRT package for managing and monitoring UU Game Booster with LuCI web interf
 │                   └── uu-booster.lua
 ├── scripts/
 │   └── build.sh                  # Build script
-├── builder/
-│   └── Dockerfile                 # Custom builder (optional)
-├── output/                       # Compiled .ipk files
-└── docker-compose.yml              # Docker Compose setup
+└── output/                       # Compiled .ipk files
 ```
 
 ## Building
 
-### Option 1: Using build.sh script (Recommended)
+### Using build.sh script (Recommended)
 
-Build for specific architecture:
 ```bash
-./scripts/build.sh x86_64
+./scripts/build.sh
 ```
 
-Build for all architectures:
-```bash
-./scripts/build.sh all
-```
+**Note:** Packages are architecture-independent (`_all.ipk`). The UU booster binary is automatically downloaded at install-time based on the router's detected architecture.
 
-Available architectures: `aarch64`, `arm`, `mipsel`, `x86_64`
+### Using GitHub Actions
 
-### Option 2: Using Docker Compose
-
-Start the builder containers:
-```bash
-docker-compose up -d
-```
-
-Build for x86_64:
-```bash
-docker-compose exec builder sh -c "
-  cp -r /packages/uu-booster /builder/package/ &&
-  make package/uu-booster/compile V=s &&
-  cp /builder/bin/packages/*/uu-booster_*.ipk /output/
-"
-
-docker-compose exec builder sh -c "
-  cp -r /packages/luci-app-uu-booster /builder/package/ &&
-  make package/luci-app-uu-booster/compile V=s &&
-  cp /builder/bin/packages/*/luci-app-uu-booster_*.ipk /output/
-"
-```
-
-Build for other architectures:
-```bash
-# aarch64
-docker-compose exec builder-aarch64 sh -c "..."
-# arm
-docker-compose exec builder-arm sh -c "..."
-# mipsel
-docker-compose exec builder-mipsel sh -c "..."
-```
-
-### Option 3: Using GitHub Actions
-
-Push to GitHub and the workflow will automatically build packages for all architectures.
+Push to GitHub and the workflow will automatically build generic packages.
 
 Generated packages will be available as GitHub Actions artifacts.
+
+### Manual Triggers
+
+1. Go to Actions tab in GitHub
+2. Select "Build UU Booster Packages" workflow
+3. Click "Run workflow"
+4. Select branch and click "Run workflow"
+
+### Download Artifacts
+
+After workflow completes:
+1. Go to Actions tab
+2. Select workflow run
+3. Scroll down to "Artifacts" section
+4. Download packages
 
 ## Installation
 
@@ -149,15 +124,11 @@ The package automatically detects the router's architecture and downloads the ap
 ### Using OpenWRT RootFS Docker
 
 ```bash
-# Test x86_64 package
-docker run --rm -v ./output:/tmp openwrt/rootfs:x86_64 sh -c "
-  opkg update &&
-  opkg install /tmp/uu-booster_*_x86_64.ipk &&
-  opkg install /tmp/luci-app-uu-booster_*_all.ipk
-"
-
-# Test other architectures (requires QEMU)
-docker run --rm --platform linux/arm/v7 -v ./output:/tmp openwrt/rootfs:arm_cortex-a7 sh -c "..."
+# Test generic packages on any architecture
+./scripts/test.sh x86_64
+./scripts/test.sh aarch64
+./scripts/test.sh arm
+./scripts/test.sh mipsel
 ```
 
 ## Troubleshooting
@@ -177,13 +148,9 @@ docker run --rm --platform linux/arm/v7 -v ./output:/tmp openwrt/rootfs:arm_cort
 ### Service Won't Start
 
 1. Check logs: `logread | grep uu-booster`
-2. Verify binary exists: `ls -la /usr/sbin/uu/uu-booster`
+2. Verify binary exists: `ls -la /usr/sbin/uu/uuplugin`
 3. Check config file: `cat /etc/uu-booster.conf`
 4. Ensure tun module is loaded: `lsmod | grep tun`
-
-## License
-
-This project is based on the UU Game Booster OpenWRT plugin reference implementation.
 
 ## Documentation
 
@@ -199,3 +166,4 @@ For detailed documentation, see:
 - [OpenWRT Documentation](https://openwrt.org/docs/)
 - [LuCI Documentation](https://github.com/openwrt/luci)
 - [Reference Implementation](https://github.com/ttc0419/uuplugin)
+
