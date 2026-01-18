@@ -1,10 +1,10 @@
 include $(TOPDIR)/rules.mk
 
-LUCI_TITLE:=UU Game Booster
+LUCI_TITLE:=LuCI support for uu-booster
 LUCI_DEPENDS:=+uu-booster
 LUCI_PKGARCH:=all
 
-include ../../luci.mk
+PKG_NAME:=luci-app-uu-booster
 
 define Package/luci-app-uu-booster/postinst
 #!/bin/sh
@@ -20,4 +20,6 @@ define Package/luci-app-uu-booster/install
 	$(call Package/luci/install/template,$(1),applications/uu-booster)
 endef
 
-$(eval $(call BuildPackage,luci-app-uu-booster))
+include $(TOPDIR)/feeds/luci/luci.mk
+
+# call BuildPackage - OpenWrt buildroot signature

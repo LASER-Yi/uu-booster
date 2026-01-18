@@ -9,7 +9,7 @@ include $(INCLUDE_DIR)/package.mk
 define Package/uu-booster
   SECTION:=net
   CATEGORY:=Network
-  TITLE:=UU Game Booster
+  TITLE:=UU Game Booster OpenWRT Unofficial Support
   DEPENDS:=+kmod-tun
   MAINTAINER:=LASER-Yi
   URL:=https://github.com/LASER-Yi/uu-booster
@@ -26,7 +26,7 @@ endef
 define Build/Compile
 endef
 
- define Package/uu-booster/install
+define Package/uu-booster/install
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_DIR) $(1)/usr/sbin
@@ -201,4 +201,4 @@ define Package/uu-booster/postrm
 	rm -f /etc/uu-booster.conf
 endef
 
-$(eval $(call BuildPackage,uu-booster))
+$(eval $(call BuildPackage,$(PKG_NAME)))
