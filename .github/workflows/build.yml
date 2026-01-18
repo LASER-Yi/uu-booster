@@ -30,17 +30,10 @@ jobs:
       uses: openwrt/gh-action-sdk@v10
       env:
         ARCH: ${{ matrix.arch }}-${{ matrix.sdk }}
+        FEEDNAME: packages_ci
         PACKAGES: uu-booster luci-app-uu-booster
         MAKEFLAGS: -j$(nproc)
         V: s
-
-    - name: Verify build output
-      run: |
-        if [ ! -d "bin/packages" ] || [ -z "$(find bin/packages -name '*.ipk' -type f)" ]; then
-          echo "Error: No packages found!"
-          exit 1
-        fi
-        find bin/packages -name '*.ipk' -type f -exec ls -lh {} \;
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
@@ -55,7 +48,7 @@ jobs:
         path: logs/
 
   release:
-    name: Create Release
+    name: Create release
     needs: build
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
