@@ -16,11 +16,24 @@ This guide explains how to build UU Booster OpenWRT packages.
 ./scripts/quick-start.sh
 ```
 
-## Method 1: Build Script (Recommended)
+## Method 1: GitHub Actions (Recommended)
 
-```bash
-./scripts/build.sh
-```
+Push to GitHub and the workflow will automatically build generic packages using the official OpenWRT SDK.
+
+### Manual Triggers
+
+1. Go to Actions tab in GitHub
+2. Select "Build UU Booster Packages" workflow
+3. Click "Run workflow"
+4. Select branch and click "Run workflow"
+
+### Download Artifacts
+
+After workflow completes:
+1. Go to Actions tab
+2. Select workflow run
+3. Scroll down to "Artifacts" section
+4. Download the `uu-booster` artifact
 
 Output:
 ```
@@ -153,8 +166,8 @@ docker pull openwrt/sdk:x86-64-22.03.7
 
 **Solution:**
 ```bash
-# Fix permissions on output directory
-sudo chown -R $USER:$USER output/
+# Fix permissions on bin directory
+sudo chown -R $USER:$USER bin/
 
 # Run with sudo if needed (not recommended)
 sudo ./scripts/build.sh
@@ -214,42 +227,26 @@ cat /etc/uu-booster.conf
 
 ### Custom SDK Version
 
-Edit `scripts/build.sh`:
-```bash
-SDK_VERSION="23.05.0"  # Change version
-```
-
-Edit `docker-compose.yml`:
+Edit `.github/workflows/build.yml`:
 ```yaml
-services:
-  builder:
-    image: openwrt/sdk:x86-64-23.05.0
-```
-
-### Custom Build Options
-
-Edit `scripts/build.sh`:
-```bash
-docker run --rm \
-  -v "$PROJECT_ROOT/packages:/packages:ro" \
-  -v "$PROJECT_ROOT/output:/output" \
-  -e TOPDIR=/builder \
-  -e "BUILD_LOG=y" \  # Enable build logs
-  -e "IGNORE_ERRORS=0" \  # Fail on errors
-  "$sdk_image" ...
+- name: Build packages with OpenWRT SDK
+  uses: openwrt/gh-action-sdk@v10
+  env:
+    ARCH: x86_64-23.05.0  # Change version
+    PACKAGES: uu-booster luci-app-uu-booster
+    V: s
 ```
 
 ### Clean Build
 
 ```bash
-# Remove output directory
-rm -rf output
+# Remove bin directory
+rm -rf bin
 
 # Or use git clean
 git clean -fdx
 
-# Rebuild from scratch
-./scripts/build.sh
+# Rebuild from scratch via GitHub Actions
 ```
 
 ## Development Workflow
@@ -260,41 +257,28 @@ git clean -fdx
 # 1. Make changes to package files
 vim packages/uu-booster/Makefile
 
-# 2. Build for quick testing
-./scripts/build.sh
+# 2. Commit and push changes (triggers CI)
+git add .
+git commit -m "Update package version"
+git push origin main
 
-# 3. Test packages
+# 3. Download artifacts from GitHub Actions
+# 4. Test packages locally
 ./scripts/test.sh x86_64
-
-# 4. If tests pass, test on other architectures
 ./scripts/test.sh aarch64
 ./scripts/test.sh arm
 ./scripts/test.sh mipsel
-
-# 5. Commit changes
-git add .
-git commit -m "Update package version"
-
-# 6. Push to GitHub (triggers CI)
-git push origin main
-
-# 7. Download artifacts from GitHub Actions
 ```
 
 ### Debug Builds
 
 ```bash
-# Enable verbose build output
-docker run --rm \
-  -v "$PROJECT_ROOT/packages:/packages:ro" \
-  -v "$PROJECT_ROOT/output:/output" \
-  -e TOPDIR=/builder \
-  openwrt/sdk:x86-64-22.03.7 \
-  sh -c "make package/uu-booster/compile V=sc"
+# Check workflow logs in GitHub Actions
+# Enable verbose output by checking V: s environment variable
 
-# Check build logs
-ls -la sdk/build_dir/
-ls -la sdk/logs/
+# For local debugging, download artifacts and test with scripts/test.sh
+./scripts/test.sh x86_64
+```
 ```
 
 ## Performance Optimization

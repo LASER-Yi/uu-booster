@@ -19,26 +19,34 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Set up Docker
-      run: |
-        docker --version
+    - name: Cache OpenWRT feeds
+      uses: actions/cache@v4
+      with:
+        path: feeds/
+        key: feeds-${{ runner.os }}-22.03.7-${{ hashFiles('feeds.conf.default') }}
+        restore-keys: |
+          feeds-${{ runner.os }}-22.03.7-
 
-    - name: Build packages
-      run: ./scripts/build.sh
+    - name: Build packages with OpenWRT SDK
+      uses: openwrt/gh-action-sdk@v10
+      env:
+        ARCH: x86_64-22.03.7
+        PACKAGES: uu-booster luci-app-uu-booster
+        V: s
 
     - name: Verify build output
       run: |
-        if [ ! -d "output" ] || [ -z "$(ls -A output/*.ipk 2>/dev/null)" ]; then
-          echo "Error: No packages found in output directory!"
+        if [ ! -d "bin/packages" ] || [ -z "$(find bin/packages -name '*.ipk' -type f)" ]; then
+          echo "Error: No packages found!"
           exit 1
         fi
-        ls -lh output/
+        find bin/packages -name '*.ipk' -type f -exec ls -lh {} \;
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
         name: uu-booster
-        path: output/*.ipk
+        path: bin/packages/**/*.ipk
         retention-days: 30
         if-no-files-found: error
 

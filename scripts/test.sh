@@ -52,14 +52,14 @@ echo "========================================="
 echo "Testing packages on $ARCH rootfs"
 echo "========================================="
 
-if [ ! -d "$PROJECT_ROOT/output" ]; then
-	echo "Error: No packages found in output/ directory"
-	echo "Please build packages first using: ./scripts/build.sh"
+if [ ! -d "$PROJECT_ROOT/bin/packages" ]; then
+	echo "Error: No packages found in bin/packages/ directory"
+	echo "Please build packages first using GitHub Actions or OpenWRT SDK"
 	exit 1
 fi
 
-UU_PACKAGE=$(ls "$PROJECT_ROOT/output"/uu-booster_*_all.ipk 2>/dev/null | head -1)
-LUCI_PACKAGE=$(ls "$PROJECT_ROOT/output"/luci-app-uu-booster_*.ipk 2>/dev/null | head -1)
+UU_PACKAGE=$(find "$PROJECT_ROOT/bin/packages" -name "uu-booster_*_all.ipk" 2>/dev/null | head -1)
+LUCI_PACKAGE=$(find "$PROJECT_ROOT/bin/packages" -name "luci-app-uu-booster_*.ipk" 2>/dev/null | head -1)
 
 if [ -z "$UU_PACKAGE" ]; then
 	echo "Error: uu-booster package not found"
@@ -146,7 +146,7 @@ echo "========================================="
 EOF
 
 docker run --rm --platform "$PLATFORM" \
-	-v "$PROJECT_ROOT/output":/packages:ro \
+	-v "$PROJECT_ROOT/bin/packages":/packages:ro \
 	-v /tmp/test-install.sh:/test-install.sh:ro \
 	openwrt/rootfs:"$ROOTFS_TAG" \
 	sh /test-install.sh

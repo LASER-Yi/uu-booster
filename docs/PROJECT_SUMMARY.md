@@ -49,30 +49,22 @@ This project provides OpenWRT packages for managing and monitoring UU Game Boost
 
 ### Build Pipeline
 
-#### Option 1: Build Script
-**Location:** `scripts/build.sh`
+#### GitHub Actions (Recommended)
+**Location:** `.github/workflows/build.yml`
 
 **Features:**
-- Single build using x86_64 SDK (fastest)
-- Generates architecture-independent packages (`_all.ipk`)
-- Automatic SDK Docker image pulling
-- Volume mounting for packages and output
-- Generates .ipk files in `output/` directory
+- Uses official OpenWRT SDK action (pinned to v10)
+- Feeds caching for faster builds
+- Automatic builds on push/PR
+- Manual workflow triggers
+- GitHub Actions artifacts
+- Automatic release creation on tags
+- Generates .ipk files in `bin/packages/` directory
 
 **Usage:**
-```bash
-./scripts/build.sh
-```
-
-**Output:**
-```
-uu-booster_1.0.0-1_all.ipk
-luci-app-uu-booster_1.0.0-1_all.ipk
-```
-
----
-
-#### Option 2: GitHub Actions
+- Push to GitHub → Auto-build generic packages
+- Go to Actions → Select workflow → Run
+- Download `uu-booster` artifact from completed runs
 **Location:** `.github/workflows/build.yml`
 
 **Features:**
@@ -205,7 +197,6 @@ uu-booster/
 │       └── htdocs/luci-static/resources/view/uu-booster/
 │           └── main.htm
 ├── scripts/
-│   ├── build.sh              # Build script
 │   ├── test.sh              # Test script
 │   ├── quick-start.sh       # Interactive menu
 │   ├── validate.sh         # Validation script
@@ -225,7 +216,7 @@ uu-booster/
 
 ```bash
 # Transfer packages to router (scp, WinSCP, etc.)
-scp output/*.ipk root@192.168.1.1:/tmp/
+scp bin/packages/**/*.ipk root@192.168.1.1:/tmp/
 
 # SSH to router
 ssh root@192.168.1.1

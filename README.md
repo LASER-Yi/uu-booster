@@ -32,24 +32,16 @@ OpenWRT package for managing and monitoring UU Game Booster with LuCI web interf
 │                   └── uu-booster.lua
 ├── scripts/
 │   └── build.sh                  # Build script
-└── output/                       # Compiled .ipk files
+└── bin/                          # Build artifacts (generated)
 ```
 
 ## Building
 
-### Using build.sh script (Recommended)
+### Using GitHub Actions (Recommended)
 
-```bash
-./scripts/build.sh
-```
+Push to GitHub and the workflow will automatically build generic packages using the official OpenWRT SDK.
 
 **Note:** Packages are architecture-independent (`_all.ipk`). The UU booster binary is automatically downloaded at install-time based on the router's detected architecture.
-
-### Using GitHub Actions
-
-Push to GitHub and the workflow will automatically build generic packages.
-
-Generated packages will be available as GitHub Actions artifacts.
 
 ### Manual Triggers
 
@@ -135,9 +127,9 @@ The package automatically detects the router's architecture and downloads the ap
 
 ### Build Fails
 
-1. Ensure Docker is installed and running
-2. Check that the SDK image pulls successfully: `docker pull openwrt/sdk:x86-64-22.03.7`
-3. Verify package files exist in `packages/` directory
+1. Ensure you're pushing to `main` or `master` branch, or trigger workflow manually
+2. Check workflow logs in GitHub Actions tab
+3. Verify package Makefiles exist in `packages/` directory
 
 ### Download Fails
 

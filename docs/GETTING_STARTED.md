@@ -12,11 +12,15 @@ This will show you an interactive menu with options to build, test, or get more 
 
 ## Build Your First Packages
 
-```bash
-./scripts/build.sh
-```
+Push to GitHub and the workflow will automatically build generic packages using the official OpenWRT SDK.
 
-The compiled `.ipk` files will be in the `output/` directory:
+Or trigger the workflow manually:
+1. Go to Actions tab in GitHub
+2. Select "Build UU Booster Packages" workflow
+3. Click "Run workflow"
+4. Select branch and click "Run workflow"
+
+The compiled `.ipk` files will be in the `bin/packages/` directory:
 - `uu-booster_1.0.0-1_all.ipk` - Generic main package
 - `luci-app-uu-booster_1.0.0-1_all.ipk` - Generic web interface package
 
@@ -61,7 +65,6 @@ Start here to understand the full project:
 
 ### Build Tools
 
-- **build.sh** - Build script for generic packages
 - **test.sh** - Test packages on any OpenWRT rootfs
 - **quick-start.sh** - Interactive menu
 - **validate.sh** - Validate all project files
@@ -92,7 +95,7 @@ When you install the package on your router, it automatically detects the archit
 
 1. Read `docs/IMPLEMENTATION.md` for a complete overview
 2. Run `./scripts/quick-start.sh` for an interactive menu
-3. Build packages: `./scripts/build.sh`
+3. Build packages via GitHub Actions
 4. Test packages: `./scripts/test.sh x86_64`
 5. Read `README.md` for installation instructions
 

@@ -9,46 +9,27 @@ echo "=========================================="
 echo ""
 
 echo "Choose an option:"
-echo "1) Build packages for x86_64 (fastest, host architecture)"
-echo "2) Build packages for all architectures"
-echo "3) Test x86_64 packages in Docker"
-echo "4) Start Docker Compose builder environment"
-echo "5) Show project information"
+echo "1) Open GitHub Actions to build packages"
+echo "2) Test x86_64 packages in Docker"
+echo "3) Show project information"
 echo ""
-read -p "Enter option [1-5]: " option
+read -p "Enter option [1-3]: " option
 
 case "$option" in
 	1)
 		echo ""
-		echo "Building for x86_64..."
-		"$SCRIPT_DIR/build.sh" x86_64
+		echo "Opening GitHub Actions to build packages..."
+		echo "Builds are automatically triggered on push to main/master branches"
+		echo "Or use 'workflow_dispatch' to trigger manually from GitHub"
+		echo ""
+		echo "Visit: https://github.com/$(git config remote.origin.url | sed 's/.*://g' | sed 's/.git$//g')/actions"
 		;;
 	2)
-		echo ""
-		echo "Building for all architectures..."
-		echo "This may take 10-20 minutes depending on your system"
-		read -p "Continue? [y/N] " confirm
-		if [ "$confirm" = "y" ] || [ "$confirm" = "Y" ]; then
-			"$SCRIPT_DIR/build.sh" all
-		else
-			echo "Aborted"
-		fi
-		;;
-	3)
 		echo ""
 		echo "Testing x86_64 packages..."
 		"$SCRIPT_DIR/test.sh" x86_64
 		;;
-	4)
-		echo ""
-		echo "Starting Docker Compose builder..."
-		docker-compose up -d
-		echo ""
-		echo "Builder containers are now running."
-		echo "Use 'docker-compose ps' to check status"
-		echo "Use 'docker-compose stop' to stop containers"
-		;;
-	5)
+	3)
 		echo ""
 		echo "=========================================="
 		echo "Project Information"
@@ -67,15 +48,14 @@ case "$option" in
 		echo "  - x86_64 (e.g., x86 routers, PCs)"
 		echo ""
 		echo "Build Options:"
-		echo "  1. ./scripts/build.sh - Build generic packages"
-		echo "  2. docker-compose - Use Docker Compose builder"
-		echo "  3. GitHub Actions - Automatic CI/CD builds"
+		echo "  1. GitHub Actions - Automatic CI/CD builds (recommended)"
+		echo "  2. OpenWRT SDK - Manual build using official SDK"
+		echo "  3. scripts/test.sh - Test packages in Docker rootfs"
 		echo ""
 		echo "Documentation:"
 		echo "  - README.md: Full documentation"
 		echo "  - docs/BUILD_GUIDE.md: Build instructions"
 		echo "  - docs/GETTING_STARTED.md: Quick start guide"
-		echo "  - scripts/build.sh: Build script help"
 		echo "  - scripts/test.sh: Test script help"
 		echo ""
 		;;
