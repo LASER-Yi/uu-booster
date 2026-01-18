@@ -57,8 +57,8 @@ define Package/uu-booster/postrm
 
 	if uci get firewall.uu >/dev/null 2>&1; then
 		uci delete firewall.uu
-		uci delete firewall.@forwarding[lan_to_uu] 2>/dev/null || true
-		uci delete firewall.@forwarding[uu_to_lan] 2>/dev/null || true
+		uci delete firewall.lan_to_uu 2>/dev/null || true
+		uci delete firewall.uu_to_lan 2>/dev/null || true
 		uci commit firewall
 		/etc/init.d/firewall reload
 	fi
