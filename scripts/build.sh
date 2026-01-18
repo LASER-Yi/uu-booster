@@ -34,26 +34,19 @@ fi
 
 mkdir -p "$PROJECT_ROOT/output"
 
-echo "Building uu-booster package..."
 docker run --rm \
 	-v "$PROJECT_ROOT/packages:/packages:ro" \
 	-v "$PROJECT_ROOT/output:/output" \
 	-e "TOPDIR=/builder" \
 	"$SDK_IMAGE" /bin/sh -c "
-		cp -r /packages/uu-booster /builder/package/ && \
-		make package/uu-booster/compile V=s IGNORE_ERRORS=1 && \
-		cp /builder/bin/packages/*/uu-booster_*.ipk /output/ 2>/dev/null || true
-	"
-
-echo "Building luci-app-uu-booster package..."
-docker run --rm \
-	-v "$PROJECT_ROOT/packages:/packages:ro" \
-	-v "$PROJECT_ROOT/output:/output" \
-	-e "TOPDIR=/builder" \
-	"$SDK_IMAGE" /bin/sh -c "
-		cp -r /packages/luci-app-uu-booster /builder/package/ && \
-		make package/luci-app-uu-booster/compile V=s IGNORE_ERRORS=1 && \
-		cp /builder/bin/packages/*/luci-app-uu-booster_*.ipk /output/ 2>/dev/null || true
+		./scripts/feeds update -a
+		./scripts/feeds install -a
+		make defconfig
+		make package/uu-booster/compile V=s IGNORE_ERRORS=1
+		make package/luci-app-uu-booster/compile V=s IGNORE_ERRORS=1
+		for pkg in /builder/bin/packages/*/*.ipk; do
+			cp \"\$pkg\" /output/ 2>/dev/null || true
+		done
 	"
 
 echo ""
