@@ -27,6 +27,27 @@ cleanup() {
 
 trap cleanup EXIT
 
+get_installed_version() {
+	if [ -f "$UU_UPDATE_BINARY_DIR/uu.conf" ]; then
+		grep '^version=' "$UU_UPDATE_BINARY_DIR/uu.conf" 2>/dev/null | cut -d'=' -f2
+	else
+		echo ""
+	fi
+}
+
+get_installed_md5() {
+	if [ -f "$UU_UPDATE_BINARY_DIR/.md5" ]; then
+		cat "$UU_UPDATE_BINARY_DIR/.md5" 2>/dev/null
+	else
+		echo ""
+	fi
+}
+
+save_installed_md5() {
+	local md5="$1"
+	echo "$md5" > "$UU_UPDATE_BINARY_DIR/.md5" 2>/dev/null
+}
+
 check_arch() {
 	local arch=$1
 	local uu_arch=""
@@ -102,10 +123,13 @@ download_file() {
 
 extract_archive() {
 	local archive="$1"
+	local extract_dir="$UU_UPDATE_TEMP_DIR/extracted"
 	
 	info_message "Extracting archive: $archive"
 	
-	tar -xzf "$archive" -C "$UU_UPDATE_TEMP_DIR"
+	mkdir -p "$extract_dir"
+	
+	tar -xzf "$archive" -C "$extract_dir"
 	
 	if [ $? -ne 0 ]; then
 		error_exit "Failed to extract archive"
@@ -115,11 +139,13 @@ extract_archive() {
 }
 
 install_files() {
+	local extract_dir="$UU_UPDATE_TEMP_DIR/extracted"
+	
 	info_message "Installing files to $UU_UPDATE_BINARY_DIR"
 	
 	mkdir -p "$UU_UPDATE_BINARY_DIR"
 	
-	cp -r "$UU_UPDATE_TEMP_DIR"/* "$UU_UPDATE_BINARY_DIR/"
+	cp -r "$extract_dir"/* "$UU_UPDATE_BINARY_DIR/"
 	
 	if [ $? -ne 0 ]; then
 		error_exit "Failed to copy files"
@@ -139,8 +165,17 @@ stop_service() {
 
 start_service() {
 	if [ -f /etc/init.d/uu-booster ]; then
-		info_message "Starting uu-booster service..."
-		/etc/init.d/uu-booster start || true
+		if /etc/init.d/uu-booster enabled 2>/dev/null; then
+			info_message "Starting uu-booster service..."
+			/etc/init.d/uu-booster start || true
+		else
+			echo ""
+			echo "UU Booster service is disabled."
+			echo "To enable and start the service, run:"
+			echo "  /etc/init.d/uu-booster enable"
+			echo "  /etc/init.d/uu-booster start"
+			echo ""
+		fi
 	fi
 }
 
@@ -183,6 +218,14 @@ main() {
 		echo "UU architecture: $uu_arch"
 		echo ""
 		
+		local installed_version=$(get_installed_version)
+		if [ -n "$installed_version" ]; then
+			echo "Current installed version: $installed_version"
+		else
+			echo "Current installed version: not installed"
+		fi
+		echo ""
+		
 		info_message "Querying UU API for $uu_arch..."
 		
 		local api_response=$(curl -s "http://router.uu.163.com/api/plugin?type=openwrt-$uu_arch" 2>&1)
@@ -198,17 +241,17 @@ main() {
 			error_exit "Failed to extract download URL from API response"
 		fi
 		
-		echo "Latest download URL: ${download_url:0:80}..."
+		local installed_md5=$(get_installed_md5)
 		
-		if [ -n "$expected_md5" ]; then
-			echo "Expected MD5: ${expected_md5:0:32}..."
+		if [ "$installed_md5" = "$expected_md5" ]; then
+			echo "You already have the latest version installed."
+			echo "No update needed."
 		else
-			echo "Expected MD5: not available"
+			echo "A new version is available!"
+			echo ""
+			echo "To install the latest version, run:"
+			echo "  $0 update"
 		fi
-		
-		echo ""
-		echo "To install the latest version, run:"
-		echo "  $0 update"
 		echo ""
 		exit 0
 	fi
@@ -280,6 +323,7 @@ main() {
 	
 	if extract_archive "$archive_file"; then
 		if install_files; then
+			save_installed_md5 "$expected_md5"
 			stop_service
 			start_service
 			
@@ -288,7 +332,14 @@ main() {
 			echo "Update completed successfully!"
 			echo "========================================="
 			echo ""
-			echo "Service has been restarted"
+			if /etc/init.d/uu-booster enabled 2>/dev/null; then
+				echo "Service has been restarted"
+			else
+				echo "Service is currently disabled"
+				echo "To enable and start the service, run:"
+				echo "  /etc/init.d/uu-booster enable"
+				echo "  /etc/init.d/uu-booster start"
+			fi
 			echo ""
 			exit 0
 		else
