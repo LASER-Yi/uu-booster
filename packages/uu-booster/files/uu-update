@@ -1,7 +1,6 @@
 #!/bin/sh
 UU_UPDATE_VERSION="1.0.0"
 
-UU_UPDATE_CONFIG="/etc/uu-booster.conf"
 UU_UPDATE_BINARY_DIR="/usr/sbin/uu"
 UU_UPDATE_BINARY="uuplugin"
 UU_UPDATE_TEMP_DIR="/tmp/uu-booster-update-$(date +%s)"
@@ -112,14 +111,6 @@ extract_archive() {
 		error_exit "Failed to extract archive"
 	fi
 	
-	if [ ! -f "$UU_UPDATE_TEMP_DIR/uu.conf" ]; then
-		error_exit "uu.conf not found in archive"
-	fi
-	
-	if [ ! -f "$UU_UPDATE_TEMP_DIR/uuplugin" ]; then
-		error_exit "uuplugin not found in archive"
-	fi
-	
 	return 0
 }
 
@@ -128,16 +119,10 @@ install_files() {
 	
 	mkdir -p "$UU_UPDATE_BINARY_DIR"
 	
-	cp "$UU_UPDATE_TEMP_DIR/uu.conf" "$UU_UPDATE_CONFIG"
+	cp -r "$UU_UPDATE_TEMP_DIR"/* "$UU_UPDATE_BINARY_DIR/"
 	
 	if [ $? -ne 0 ]; then
-		error_exit "Failed to copy uu.conf"
-	fi
-	
-	cp "$UU_UPDATE_TEMP_DIR/uuplugin" "$UU_UPDATE_BINARY_DIR/$UU_UPDATE_BINARY"
-	
-	if [ $? -ne 0 ]; then
-		error_exit "Failed to copy uuplugin"
+		error_exit "Failed to copy files"
 	fi
 	
 	chmod +x "$UU_UPDATE_BINARY_DIR/$UU_UPDATE_BINARY"

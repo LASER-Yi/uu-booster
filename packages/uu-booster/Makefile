@@ -160,25 +160,14 @@ define Package/uu-booster/postinst
 		fi
 	fi
 	
-	tar -xzf uu-booster.tar.gz
-	
-	if [ ! -f uu.conf ]; then
-		echo "Error: uu.conf not found in downloaded archive"
-		exit 1
-	fi
-	
-	if [ ! -f uuplugin ]; then
-		echo "Error: uuplugin not found in downloaded archive"
-		exit 1
-	fi
-	
 	mkdir -p /usr/sbin/uu
 	
-	cp uu.conf /etc/uu-booster.conf
-	echo "Copied uu.conf to /etc/uu-booster.conf"
+	tar -xzf uu-booster.tar.gz -C /usr/sbin/uu/
 	
-	cp uuplugin /usr/sbin/uu/
-	echo "Copied uuplugin to /usr/sbin/uu/"
+	if [ $? -ne 0 ]; then
+		echo "Error: Failed to extract uu-booster.tar.gz"
+		exit 1
+	fi
 	
 	chmod +x /usr/sbin/uu/uuplugin
 	
@@ -198,7 +187,6 @@ define Package/uu-booster/postrm
 #!/bin/sh
 	/etc/init.d/uu-booster stop || true
 	rm -rf /usr/sbin/uu
-	rm -f /etc/uu-booster.conf
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))
