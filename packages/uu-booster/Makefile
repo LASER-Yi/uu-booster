@@ -28,11 +28,13 @@ endef
 
 define Package/uu-booster/install
 	$(INSTALL_DIR) $(1)/etc/init.d
+	$(INSTALL_DIR) $(1)/etc/uci-defaults
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_DIR) $(1)/usr/sbin
 	$(INSTALL_DIR) $(1)/usr/sbin/uu
 	$(INSTALL_BIN) ./files/uu-booster.init $(1)/etc/init.d/uu-booster
 	$(INSTALL_BIN) ./files/uu $(1)/usr/bin/uu
+	$(INSTALL_BIN) ./files/90-uu-booster-firewall $(1)/etc/uci-defaults/90-uu-booster-firewall
  endef
 
 define Package/uu-booster/postinst
@@ -52,6 +54,14 @@ define Package/uu-booster/postrm
 #!/bin/sh
 	/etc/init.d/uu-booster stop || true
 	rm -rf /usr/sbin/uu
+
+	if uci get firewall.uu >/dev/null 2>&1; then
+		uci delete firewall.uu
+		uci delete firewall.@forwarding[lan_to_uu] 2>/dev/null || true
+		uci delete firewall.@forwarding[uu_to_lan] 2>/dev/null || true
+		uci commit firewall
+		/etc/init.d/firewall reload
+	fi
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))

@@ -1,0 +1,38 @@
+#!/bin/sh
+
+# Check if uu zone already exists to avoid duplicate configuration
+if uci get firewall.uu >/dev/null 2>&1; then
+    echo "Firewall zone 'uu' already exists, skipping configuration..."
+    exit 0
+fi
+
+# Add firewall zone named 'uu'
+uci add firewall zone
+uci set firewall.@zone[-1].name='uu'
+uci set firewall.@zone[-1].input='ACCEPT'
+uci set firewall.@zone[-1].output='ACCEPT'
+uci set firewall.@zone[-1].forward='ACCEPT'
+
+# Add tun163 and tun164 interfaces to the zone
+uci add_list firewall.@zone[-1].device='tun163'
+uci add_list firewall.@zone[-1].device='tun164'
+
+# Masquerading disabled (not setting masq='1' means it's off by default)
+
+# Allow forwarding from lan to uu with label
+uci add firewall forwarding
+uci set firewall.@forwarding[-1].name='lan_to_uu'
+uci set firewall.@forwarding[-1].src='lan'
+uci set firewall.@forwarding[-1].dest='uu'
+
+# Allow forwarding from uu to lan with label
+uci add firewall forwarding
+uci set firewall.@forwarding[-1].name='uu_to_lan'
+uci set firewall.@forwarding[-1].src='uu'
+uci set firewall.@forwarding[-1].dest='lan'
+
+# Commit and reload firewall
+uci commit firewall
+/etc/init.d/firewall reload
+
+exit 0
