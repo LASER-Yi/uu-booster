@@ -1,7 +1,7 @@
 module("luci.controller.uu-booster", package.seeall)
 
 function index()
-	entry({"admin", "services", "uu-booster"}, cbi("uu-booster"), _("UU Booster"), 30).dependent = false
+ entry({"admin", "services", "uu-booster"}, template("uu-booster/main"), _("UU Booster"), 30).dependent = false
 	entry({"admin", "services", "uu-booster", "check_version"}, call("action_check_version")).leaf = true
 	entry({"admin", "services", "uu-booster", "uu-update"}, call("action_update")).leaf = true
 	entry({"admin", "services", "uu-booster", "status"}, call("action_status")).leaf = true
