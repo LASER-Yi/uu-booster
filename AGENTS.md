@@ -19,11 +19,17 @@
 ./scripts/test.sh arm       # Test on ARM v7 (requires QEMU)
 ./scripts/test.sh mipsel    # Test on MIPS (requires QEMU)
 
- # The test script:
- # - Builds Docker containers with OpenWRT rootfs
- # - Installs uu-booster package
- # - Verifies binary, config, and init scripts are present
- # - No unit tests - integration testing only via package installation
+# The test script:
+# - Builds Docker containers with OpenWRT rootfs
+# - Installs uu-booster package
+# - Verifies binary, config, and init scripts are present
+# - No unit tests - integration testing only via package installation
+
+# Test API responses
+./scripts/test-api.sh openwrt-x86_64
+
+# Quick start interactive menu
+./scripts/quick-start.sh
 ```
 
 ### Local Testing on Router
@@ -68,8 +74,13 @@ uu restart            # Restart service
   ```bash
   logger -t uu -p daemon.info "message"
   ```
- - **Quoting**: Double-quote all variable expansions to prevent word splitting
- - **Comments**: Minimal, only for section headers or complex logic
+- **Cleanup**: Always define cleanup function with trap
+  ```bash
+  cleanup() { rm -rf "$TEMP_DIR" 2>/dev/null; }
+  trap cleanup EXIT
+  ```
+- **Quoting**: Double-quote all variable expansions to prevent word splitting
+- **Comments**: Minimal, only for section headers or complex logic
 
 ### Makefiles (*/Makefile)
 - **Standard OpenWRT package format**
@@ -84,7 +95,8 @@ uu restart            # Restart service
   $(INSTALL_DIR) $(1)/etc/init.d
   $(INSTALL_BIN) ./files/script $(1)/etc/init.d/script
   ```
- - **Architecture**: Set `PKGARCH:=all` for architecture-independent packages
+- **Architecture**: Set `PKGARCH:=all` for architecture-independent packages
+- **Post-install**: Define postinst/postrm for service setup and cleanup
 
 ### Init Scripts (files/*.init)
 - **Procd format**: `USE_PROCD=1` required
@@ -99,23 +111,50 @@ uu restart            # Restart service
   procd_close_instance
   ```
 
- ### Naming Conventions
- - **Packages**: hyphenated lowercase (uu-booster)
- - **Files**: hyphenated or underscored (uu-booster.init, uu-update)
- - **Functions**: snake_case in shell/Lua
- - **Variables**: UPPERCASE constants, lowercase locals
+### UCI Defaults (files/*)
+- **Check existing config**: Always verify before creating
+  ```sh
+  if uci get firewall.uu >/dev/null 2>&1; then
+      exit 0  # Already configured
+  fi
+  ```
+- **Set values**: Use uci set commands
+  ```sh
+  uci set firewall.uu='zone'
+  uci set firewall.uu.name='uu'
+  uci commit firewall
+  ```
+- **Reload services**: Call service reload after commit
+  ```sh
+  /etc/init.d/firewall reload >/dev/null 2>&1
+  ```
+
+### Naming Conventions
+- **Packages**: hyphenated lowercase (uu-booster)
+- **Files**: hyphenated or underscored (uu-booster.init, uu-update)
+- **Functions**: snake_case in shell/Lua
+- **Variables**: UPPERCASE constants, lowercase locals
+- **UCI sections**: lowercase with underscores (lan_to_uu, uu_to_lan)
 
 ### Error Handling
-- Shell: Check exit codes, use `error_exit()` helper
-- Lua: Return error objects with `success` boolean
-- Init scripts: Use `|| true` to suppress errors where appropriate
-- Always log errors to system logger for debugging
+- **Shell**: Check exit codes, use `error_exit()` helper
+- **Lua**: Return error objects with `success` boolean
+- **Init scripts**: Use `|| true` to suppress errors where appropriate
+- **API calls**: Validate response before processing
+  ```bash
+  RESPONSE=$(curl -s "$URL")
+  if [ -z "$RESPONSE" ]; then
+      error_exit "No response from API"
+  fi
+  ```
+- **Always log errors** to system logger for debugging
 
- ### File Locations
- - **Binaries**: `/usr/sbin/uu/uuplugin`
- - **Config**: `/usr/sbin/uu/uu.conf`
- - **Init scripts**: `/etc/init.d/uu-booster`
- - **UCI defaults**: `/etc/uci-defaults/90-uu-booster-firewall`
+### File Locations
+- **Binaries**: `/usr/sbin/uu/uuplugin`
+- **Config**: `/usr/sbin/uu/uu.conf`
+- **Init scripts**: `/etc/init.d/uu-booster`
+- **UCI defaults**: `/etc/uci-defaults/90-uu-booster-firewall`
+- **UUID backup**: `/etc/uu/.uuplugin_uuid`
 
 ### Important Notes
 - This is an embedded systems project - avoid unnecessary dependencies
@@ -123,3 +162,4 @@ uu restart            # Restart service
 - Always test on multiple architectures if making changes
 - No traditional linting/formatters - manual code review required
 - Follow OpenWRT package conventions strictly
+- Use `logger -t uu` for consistent logging prefix
