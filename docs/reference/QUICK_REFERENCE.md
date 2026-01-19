@@ -69,9 +69,6 @@ cat JSON_FIX.md
 # Build packages
 ./scripts/build.sh x86_64
 
-# Validate project
-./scripts/validate.sh
-
 # Quick start menu
 ./scripts/quick-start.sh
 ```

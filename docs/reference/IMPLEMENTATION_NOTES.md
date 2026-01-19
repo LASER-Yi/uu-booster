@@ -144,11 +144,6 @@ fi
 ./scripts/download-uu.sh openwrt-x86_64
 ```
 
-### Validate Project
-```bash
-./scripts/validate.sh
-```
-
 ### Build Packages
 ```bash
 ./scripts/build.sh x86_64

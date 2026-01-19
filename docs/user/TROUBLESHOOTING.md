@@ -591,11 +591,6 @@ echo "=== UUID ==="
 ls -la /usr/sbin/uu/.uuplugin_uuid
 ```
 
-**Run comprehensive check:**
-```bash
-./scripts/validate.sh
-```
-
 ---
 
 ## Common Solutions
@@ -624,7 +619,7 @@ uu update
 /etc/init.d/uu-booster stop
 rm -rf /usr/sbin/uu/*
 uu update
-uu start
+/etc/init.d/uu-booster start
 ```
 
 ### Reset to Factory State

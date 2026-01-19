@@ -20,8 +20,7 @@ uu-booster/
 │   ├── test.sh                # Package installation testing
 │   ├── download-uu.sh         # Manual binary download utility
 │   ├── test-api.sh            # API response testing
-│   ├── quick-start.sh         # Interactive menu
-│   └── validate.sh            # Project validation
+│   └── quick-start.sh         # Interactive menu
 ├── .github/workflows/
 │   └── build.yml              # GitHub Actions CI/CD pipeline
 ├── docs/                      # Documentation

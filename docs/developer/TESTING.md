@@ -252,38 +252,6 @@ Manually download UU booster binary for testing.
 - Can extract and inspect binary content
 - Helps debug download issues
 
-#### validate.sh
-
-Validate all project files for consistency.
-
-```bash
-./scripts/validate.sh
-```
-
-**What it checks:**
-- Package Makefile syntax
-- Required files presence
-- File permissions
-- Configuration consistency
-- Documentation completeness
-
-**Output:**
-```
-Validating project files...
-
-Checking package structure...
-✓ Makefile exists
-✓ files directory exists
-✓ control file exists
-
-Checking file contents...
-✓ control: Package name correct
-✓ control: Version format correct
-✓ init script valid
-
-Project validation PASSED
-```
-
 ---
 
 ## Integration Testing

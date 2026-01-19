@@ -6,6 +6,20 @@ The `uu` command provides a simple interface for managing UU Game Booster on you
 
 ### Service Management
 
+The `uu` script provides convenience commands for common operations. For full service control, use the init script directly:
+
+```bash
+# Status and restart (available via uu)
+uu status
+uu restart
+
+# Start, stop, enable, disable (use init script)
+/etc/init.d/uu-booster start
+/etc/init.d/uu-booster stop
+/etc/init.d/uu-booster enable
+/etc/init.d/uu-booster disable
+```
+
 #### `uu status`
 
 Check the current status of the UU Booster service.
@@ -21,31 +35,7 @@ Version: 9.2.10
 PID: 1234
 ```
 
-#### `uu start`
-
-Start the UU Booster service.
-
-```bash
-uu start
-```
-
-This is equivalent to:
-```bash
-/etc/init.d/uu-booster start
-```
-
-#### `uu stop`
-
-Stop the UU Booster service.
-
-```bash
-uu stop
-```
-
-This is equivalent to:
-```bash
-/etc/init.d/uu-booster stop
-```
+This command queries the OpenWRT procd service manager to show if the service is running.
 
 #### `uu restart`
 
@@ -60,32 +50,6 @@ This is useful after configuration changes or to recover from errors.
 This is equivalent to:
 ```bash
 /etc/init.d/uu-booster restart
-```
-
-#### `uu enable`
-
-Enable UU Booster to start automatically on boot.
-
-```bash
-uu enable
-```
-
-This is equivalent to:
-```bash
-/etc/init.d/uu-booster enable
-```
-
-#### `uu disable`
-
-Disable UU Booster from starting automatically on boot.
-
-```bash
-uu disable
-```
-
-This is equivalent to:
-```bash
-/etc/init.d/uu-booster disable
 ```
 
 ### Update Management
