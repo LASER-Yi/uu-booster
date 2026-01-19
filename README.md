@@ -1,143 +1,102 @@
-# UU Game Booster for OpenWRT
+# UU Booster for OpenWRT
 
-OpenWRT package for managing and monitoring UU Game Booster.
+UU Game Booster OpenWRT 管理工具 - 非官方实现
 
-## Features
+## 项目简介
 
-- Downloads and manages the uu-booster binary from UU servers
-- Multi-architecture support: aarch64, arm, mipsel, x86_64
-- Automatic service management via procd
-- Version checking and updates via command line
+本项目提供 UU 游戏加速器在 OpenWRT 路由器上的便捷管理方案。通过一个简单的安装包，即可自动下载和配置官方 UU 插件。
 
-## Project Structure
+## 主要特性
 
-```
-.
-├── packages/
-│   └── uu-booster/              # Main package
-│       ├── Makefile
-│       └── files/
-│           ├── control
-│           ├── uu-booster.init
-│           ├── uu-update
-│           └── (postinst, postrm in Makefile)
-├── scripts/
-│   └── test.sh                  # Test script
-└── bin/                          # Build artifacts (generated)
-```
+- **便捷管理** - 一键安装、启动、停止、更新 UU 插件
+- **自动架构检测** - 自动识别路由器架构并下载对应的官方二进制文件
+- **多架构支持** - 单一安装包支持 aarch64、arm、mipsel、x86_64
+- **安全验证** - MD5 校验确保下载文件完整性
+- **故障恢复** - 主备 URL 自动切换，下载失败自动重试
+- **服务管理** - 集成 OpenWRT procd 服务管理
+- **防火墙配置** - 自动配置必要的防火墙规则
+- ⚠️ **测试说明** - 仅在 OpenWRT 24.10.1 上测试通过，其他版本可能需要适配
 
-## Building
+## 支持的设备
 
-### Using GitHub Actions (Recommended)
+- **aarch64**: 树莓派 4、瑞芯微板子、ARM64 路由器
+- **arm**: 树莓派 2/3、各种 ARMv7 板子
+- **mipsel**: MT7620/7621、联发科路由器
+- **x86_64**: x86 路由器、运行 OpenWRT 的 PC
 
-Push to GitHub and the workflow will automatically build generic packages using the official OpenWRT SDK.
+## 快速安装
 
-**Note:** Packages are architecture-independent (`_all.ipk`). The UU booster binary is automatically downloaded at install-time based on the router's detected architecture.
+### 方法 1：LuCI 网页界面安装（最简单）
 
-### Manual Triggers
+1. 登录 OpenWRT 路由器的 LuCI 网页界面（通常是 http://192.168.1.1）
+2. 进入 "系统" → "软件包"
+3. 点击 "上传软件包"
+4. 选择下载的 `uu-booster_*.ipk` 文件并上传
+5. 点击 "安装"
+6. 安装完成后，服务会自动启动
 
-1. Go to Actions tab in GitHub
-2. Select "Build UU Booster Packages" workflow
-3. Click "Run workflow"
-4. Select branch and click "Run workflow"
+### 方法 2：从 GitHub Releases 安装（推荐）
 
-### Download Artifacts
+⚠️ **注意**：本项目仅在 OpenWRT 24.10.1 上测试通过。如果您在其他版本遇到问题，请提交 Issue。
 
-After workflow completes:
-1. Go to Actions tab
-2. Select workflow run
-3. Scroll down to "Artifacts" section
-4. Download packages
-
-## Installation
-
-Transfer the compiled `.ipk` files to your OpenWRT router and install:
+1. 下载对应架构的安装包
+2. 上传到 OpenWRT 路由器
+3. 通过 SSH 连接到路由器并安装：
 
 ```bash
-opkg update
 opkg install uu-booster_*.ipk
 ```
 
-## Usage
+安装包会自动：
+- 检测路由器架构
+- 从网易官方服务器下载对应的二进制文件
+- 配置防火墙规则
+- 启动服务
+
+## 快速开始
+
+安装后，使用简单的命令管理 UU 加速器：
 
 ```bash
-# Start service
-/etc/init.d/uu-booster start
+# 查看服务状态
+uu status
 
-# Stop service
-/etc/init.d/uu-booster stop
+# 检查更新
+uu check
 
-# Restart service
-/etc/init.d/uu-booster restart
+# 更新到最新版本
+uu update
 
-# Check status
-/etc/init.d/uu-booster status
-
-# Enable on boot
-/etc/init.d/uu-booster enable
-
-# Disable on boot
-/etc/init.d/uu-booster disable
-
-# Check for updates
-/usr/bin/uu-update check
-
-# Update to latest version
-/usr/bin/uu-update update
+# 重启服务
+uu restart
 ```
 
-## Architecture Support
+## 文档
 
-The package automatically detects the router's architecture and downloads the appropriate binary:
+- [安装指南](docs/user/INSTALLATION.md) - 详细安装说明
+- [使用指南](docs/user/USAGE.md) - 命令行用法和配置
+- [故障排除](docs/user/TROUBLESHOOTING.md) - 常见问题和解决方案
 
-| OpenWRT Arch | UU API Parameter |
-|---------------|------------------|
-| aarch64_*     | openwrt-aarch64 |
-| arm_*          | openwrt-arm |
-| mipsel_*       | openwrt-mipsel |
-| x86_64         | openwrt-x86_64 |
+## 参考项目
 
-## Testing
+- [ttc0419/uuplugin](https://github.com/ttc0419/uuplugin) - 参考实现
+- [luci-app-uugamebooster](https://github.com/coolsnowwolf/luci/tree/master/applications/luci-app-uugamebooster) - LuCI 网页界面
 
-### Using OpenWRT RootFS Docker
+## AI 使用说明
 
-```bash
-# Test generic packages on any architecture
-./scripts/test.sh x86_64
-./scripts/test.sh aarch64
-./scripts/test.sh arm
-./scripts/test.sh mipsel
-```
+本项目的大部分代码由 AI 辅助编写和生成，包括：
+- OpenWRT 包管理脚本
+- GitHub Actions 工作流配置
+- 文档编写和维护
+- 测试脚本和工具
 
-## Troubleshooting
+虽然代码经过人工审核，但可能存在未发现的问题。如果您在使用过程中遇到任何异常行为，请：
+1. 检查 [故障排除文档](docs/user/TROUBLESHOOTING.md)
+2. 在 GitHub 上 [提交 Issue](https://github.com/LASER-Yi/uu-booster/issues)
+3. 提供详细的错误信息和系统环境
 
-### Build Fails
+您的反馈将帮助改进这个项目！
 
-1. Ensure you're pushing to `main` or `master` branch, or trigger workflow manually
-2. Check workflow logs in GitHub Actions tab
-3. Verify package Makefiles exist in `packages/` directory
+## 许可证
 
-### Download Fails
-
-1. Check internet connectivity
-2. Verify UU API is accessible: `curl -v http://router.uu.163.com/api/plugin?type=openwrt-x86_64`
-3. Check firewall settings on the router
-
-### Service Won't Start
-
-1. Check logs: `logread | grep uu-booster`
-2. Verify binary exists: `ls -la /usr/sbin/uu/uuplugin`
-3. Check config file: `cat /usr/sbin/uu/uu.conf`
-4. Ensure tun module is loaded: `lsmod | grep tun`
-
-## Documentation
-
-For detailed documentation, see:
-- [docs/BUILD_GUIDE.md](docs/BUILD_GUIDE.md) - Build instructions
-- [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md) - Quick start guide
-- [docs/PROJECT_SUMMARY.md](docs/PROJECT_SUMMARY.md) - Complete project overview
-
-## References
-
-- [Reference Implementation](https://github.com/ttc0419/uuplugin)
-
+[License](LICENSE)
