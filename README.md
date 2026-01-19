@@ -1,37 +1,28 @@
 # UU Game Booster for OpenWRT
 
-OpenWRT package for managing and monitoring UU Game Booster with LuCI web interface.
+OpenWRT package for managing and monitoring UU Game Booster.
 
 ## Features
 
-- **uu-booster package**: Downloads and manages the uu-booster binary from UU servers
-- **luci-app-uu-booster**: Web UI for version management and updates
+- Downloads and manages the uu-booster binary from UU servers
 - Multi-architecture support: aarch64, arm, mipsel, x86_64
 - Automatic service management via procd
-- Version checking and one-click updates
+- Version checking and updates via command line
 
 ## Project Structure
 
 ```
 .
 ├── packages/
-│   ├── uu-booster/              # Main package
-│   │   ├── Makefile
-│   │   └── files/
-│   │       ├── control
-│   │       ├── uu-booster.init
-│   │       ├── uu-update
-│   │       └── (postinst, postrm in Makefile)
-│   └── luci-app-uu-booster/      # LuCI interface
+│   └── uu-booster/              # Main package
 │       ├── Makefile
-│       └── luasrc/
-│           ├── controller/
-│           │   └── uu-booster.lua
-│           └── model/
-│               └── cbi/
-│                   └── uu-booster.lua
+│       └── files/
+│           ├── control
+│           ├── uu-booster.init
+│           ├── uu-update
+│           └── (postinst, postrm in Makefile)
 ├── scripts/
-│   └── build.sh                  # Build script
+│   └── test.sh                  # Test script
 └── bin/                          # Build artifacts (generated)
 ```
 
@@ -65,12 +56,9 @@ Transfer the compiled `.ipk` files to your OpenWRT router and install:
 ```bash
 opkg update
 opkg install uu-booster_*.ipk
-opkg install luci-app-uu-booster_*.ipk
 ```
 
 ## Usage
-
-### Command Line
 
 ```bash
 # Start service
@@ -90,15 +78,13 @@ opkg install luci-app-uu-booster_*.ipk
 
 # Disable on boot
 /etc/init.d/uu-booster disable
+
+# Check for updates
+/usr/bin/uu-update check
+
+# Update to latest version
+/usr/bin/uu-update update
 ```
-
-### LuCI Web Interface
-
-1. Access OpenWRT LuCI interface (usually `http://192.168.1.1`)
-2. Navigate to **Services → UU Booster**
-3. View current version and service status
-4. Click "Check for Updates" to get the latest version
-5. Click "Update to Latest" to download and install updates
 
 ## Architecture Support
 
@@ -150,12 +136,8 @@ For detailed documentation, see:
 - [docs/BUILD_GUIDE.md](docs/BUILD_GUIDE.md) - Build instructions
 - [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md) - Quick start guide
 - [docs/PROJECT_SUMMARY.md](docs/PROJECT_SUMMARY.md) - Complete project overview
-- [docs/COMPLETE.md](docs/COMPLETE.md) - Implementation status
 
 ## References
 
-- [UU Game Booster](https://uu.163.com/)
-- [OpenWRT Documentation](https://openwrt.org/docs/)
-- [LuCI Documentation](https://github.com/openwrt/luci)
 - [Reference Implementation](https://github.com/ttc0419/uuplugin)
 

@@ -26,107 +26,9 @@ if [ $? -ne 0 ]; then
 fi
 ```
 
----
+ ---
 
-### 2. packages/luci-app-uu-booster/luasrc/controller/uu-booster.lua (Lines 69-239)
-
-**What Changed:**
-- Complete rewrite of `action_update()` function
-- Added `download_attempt()` nested function
-- Added MD5 validation logic
-- Added detailed status reporting
-
-**Key Functions:**
-```lua
--- Extract API fields
-local expected_md5 = luci.sys.exec("echo '" .. api_response .. "' | sed -n 's/.*\"md5\":\"\\([^\"]*\\)\".*/\\1/p'")
-local download_url = luci.sys.exec("echo '" .. api_response .. "' | sed -n 's/.*\"url\":\"\\([^\"]*\\)\".*/\\1/p'")
-local download_url_bak = luci.sys.exec("echo '" .. api_response .. "' | sed -n 's/.*\"url_bak\":\"\\([^\"]*\\)\".*/\\1/p'")
-
--- Download attempt function
-local download_attempt = function(url, attempt_name)
-  -- Download file
-  -- Check file size (reject <1KB)
-  -- Calculate MD5 if expected_md5 available
-  -- Compare MD5 values
-  -- Return success/failure
-end
-
--- Primary then backup logic
-local primary_success = download_attempt(download_url, "primary")
-if not primary_success then
-  local backup_success = download_attempt(download_url_bak, "backup")
-end
-```
-
-**Status JSON Response:**
-```json
-{
-  "success": true,
-  "message": "Update completed successfully",
-  "md5_check": "passed",
-  "url_used": "primary",
-  "calculated_md5": "768cd1bc4ddee165d5aea91f4d03427a",
-  "expected_md5": "768cd1bc4ddee165d5aea91f4d03427a"
-}
-```
-
----
-
-### 3. packages/luci-app-uu-booster/htdocs/main.htm (Lines 16-198)
-
-**What Changed:**
-- Added Download URL display
-- Added MD5 Check status
-- Added MD5 Details section
-- Enhanced JavaScript functions
-
-**New HTML Elements:**
-```html
-<div class="uu-booster-info">
-  <label><%:Download URL:%></label>
-  <span id="download-url">-</span>
-</div>
-
-<div class="uu-booster-info">
-  <label><%:MD5 Check:%></label>
-  <span id="md5-check">-</span>
-</div>
-
-<div id="md5-details" style="display:none;" class="uu-booster-info">
-  <label><%:Expected MD5:%></label>
-  <span id="expected-md5">-</span>
-</div>
-
-<div id="md5-details" style="display:none;" class="uu-booster-info">
-  <label><%:Calculated MD5:%></label>
-  <span id="calculated-md5">-</span>
-</div>
-```
-
-**JavaScript Updates:**
-```javascript
-// checkVersion() - Now displays download URL
-if (data.success) {
-  var latestSpan = document.getElementById('latest-version');
-  latestSpan.textContent = data.latest_version;
-  downloadUrlSpan.textContent = data.download_url.substring(0, 40) + '...';
-}
-
-// updateBooster() - Now handles MD5 display
-if (data.success) {
-  if (data.md5_check === 'passed') {
-    var md5DetailsDiv = document.getElementById('md5-details');
-    md5DetailsDiv.style.display = 'block';
-    document.getElementById('expected-md5').textContent = data.expected_md5 || '-';
-    document.getElementById('calculated-md5').textContent = data.calculated_md5 || '-';
-  }
-}
-```
-
----
-
-### 4. scripts/test-api.sh (Lines 31-66)
+### 2. scripts/test-api.sh (Lines 31-66)
 
 **What Changed:**
 - Added MD5 field extraction test
@@ -166,17 +68,17 @@ fi
 
 ### Field Purposes
 
-| Field | Purpose | Used In |
-|-------|-----------|----------|
-| md5 | Expected MD5 checksum | Postinst, LuCI |
-| url | Primary download URL | Postinst, LuCI |
-| url_bak | Backup/fallback URL | Postinst, LuCI |
+ | Field | Purpose | Used In |
+ |-------|-----------|----------|
+ | md5 | Expected MD5 checksum | Postinst |
+ | url | Primary download URL | Postinst |
+ | url_bak | Backup/fallback URL | Postinst |
 
 ---
 
 ## MD5 Validation Flow
 
-### Post-install Script (bash)
+ ### Post-install Script (bash)
 ```
 1. Query API → Get JSON response
 2. Extract md5, url, url_bak
@@ -186,19 +88,6 @@ fi
 6. If match → Install
 7. If mismatch → Try url_bak
 8. If url_bak fails → Error
-```
-
-### LuCI Controller (lua)
-```
-1. Query API → Get JSON response
-2. Extract md5, url, url_bak
-3. Try download from url
-4. Validate file size (<1KB = error)
-5. Calculate MD5 if available
-6. Compare MD5 values
-7. If pass → Extract and install
-8. If fail → Try url_bak
-9. Return detailed status JSON
 ```
 
 ---

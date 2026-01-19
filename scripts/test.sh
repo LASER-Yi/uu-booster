@@ -59,21 +59,14 @@ if [ ! -d "$PROJECT_ROOT/bin/packages" ]; then
 fi
 
 UU_PACKAGE=$(find "$PROJECT_ROOT/bin/packages" -name "uu-booster_*_all.ipk" 2>/dev/null | head -1)
-LUCI_PACKAGE=$(find "$PROJECT_ROOT/bin/packages" -name "luci-app-uu-booster_*.ipk" 2>/dev/null | head -1)
 
 if [ -z "$UU_PACKAGE" ]; then
 	echo "Error: uu-booster package not found"
 	exit 1
 fi
 
-if [ -z "$LUCI_PACKAGE" ]; then
-	echo "Error: luci-app-uu-booster package not found"
-	exit 1
-fi
-
-echo "Found packages:"
+echo "Found package:"
 echo "  - $(basename "$UU_PACKAGE")"
-echo "  - $(basename "$LUCI_PACKAGE")"
 echo ""
 
 echo "Pulling OpenWRT rootfs: openwrt/rootfs:$ROOTFS_TAG"
@@ -95,10 +88,6 @@ opkg update
 echo ""
 echo "Installing uu-booster..."
 opkg install /packages/uu-booster.ipk
-
-echo ""
-echo "Installing luci-app-uu-booster..."
-opkg install /packages/luci-app-uu-booster.ipk
 
 echo ""
 echo "Verifying installation..."
@@ -130,14 +119,7 @@ else
 	exit 1
 fi
 
-echo ""
-echo "Checking LuCI files:"
-if [ -d /usr/lib/lua/luci/controller ] && [ -d /usr/lib/lua/luci/model/cbi ]; then
-	echo "LuCI files installed"
-else
-	echo "ERROR: LuCI files not found!"
-	exit 1
-fi
+
 
 echo ""
 echo "========================================="

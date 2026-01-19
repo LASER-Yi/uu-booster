@@ -28,25 +28,6 @@ This project provides OpenWRT packages for managing and monitoring UU Game Boost
 - Dependencies: kmod-tun
 - Package is architecture-independent (`PKGARCH:=all`)
 
-#### 2. luci-app-uu-booster (LuCI Interface)
-**Location:** `packages/luci-app-uu-booster/`
-
-**Files:**
-- `Makefile` - LuCI package build definition
-- `luasrc/controller/uu-booster.lua` - Route handlers and actions
-- `luasrc/model/cbi/uu-booster.lua` - UI form definition
-- `htdocs/luci-static/resources/view/uu-booster/main.htm` - HTML/JavaScript UI
-
-**Features:**
-- Menu entry: Services → UU Booster
-- Display current version (from `/usr/sbin/uu/uu.conf`)
-- Display latest version (extracted from UU API URL)
-- One-click check for updates
-- One-click update button
-- Service status display
-- HTTP endpoints for version checking and updates
-- Package is architecture-independent (`LUCI_PKGARCH:=all`)
-
 ### Build Pipeline
 
 #### GitHub Actions (Recommended)
@@ -86,7 +67,7 @@ This project provides OpenWRT packages for managing and monitoring UU Game Boost
 
 **Features:**
 - Tests package installation in OpenWRT rootfs Docker
-- Verifies binary, config, init script, LuCI files
+- Verifies binary, config, init script.
 - Supports all architectures (QEMU for non-x86_64)
 - Tests generic packages on any platform
 
@@ -170,12 +151,6 @@ When installing the package, it automatically:
 - Stdout/stderr logging
 - Compatible with OpenWrt 22.03+
 
-### LuCI Integration
-- Clean web interface
-- AJAX-based updates (no page reload)
-- Error handling and user feedback
-- Version comparison and update notifications
-
 ## File Structure
 
 ```
@@ -187,15 +162,6 @@ uu-booster/
 │   │       ├── uu-booster.init # Init script
 │   │       ├── uu-update      # Update script
 │   │       └── control        # Metadata
-│   └── luci-app-uu-booster/  # LuCI interface
-│       ├── Makefile           # Package definition
-│       ├── luasrc/
-│       │   ├── controller/
-│       │   │   └── uu-booster.lua
-│       │   └── model/cbi/
-│       │       └── uu-booster.lua
-│       └── htdocs/luci-static/resources/view/uu-booster/
-│           └── main.htm
 ├── scripts/
 │   ├── test.sh              # Test script
 │   ├── quick-start.sh       # Interactive menu
@@ -221,12 +187,8 @@ scp bin/packages/**/*.ipk root@192.168.1.1:/tmp/
 # SSH to router
 ssh root@192.168.1.1
 
-# Install packages
+ # Install package
 opkg install /tmp/uu-booster_*_all.ipk
-opkg install /tmp/luci-app-uu-booster_*.ipk
-
-# Access LuCI
-# http://192.168.1.1/cgi-bin/luci/admin/services/uu-booster
 ```
 
 ### From GitHub Releases
@@ -250,14 +212,6 @@ opkg install /tmp/luci-app-uu-booster_*.ipk
 /usr/bin/uu-update check    # Check for updates
 /usr/bin/uu-update update   # Update to latest
 ```
-
-### LuCI Web Interface
-
-1. Navigate to Services → UU Booster
-2. View current version and service status
-3. Click "Check for Updates" to check latest version
-4. Click "Update to Latest" to update
-5. Click "Refresh Status" to refresh service status
 
 ## Troubleshooting
 

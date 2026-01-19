@@ -37,12 +37,11 @@ After workflow completes:
 
 Output:
 ```
-=========================================
+ =========================================
 Building generic packages
 =========================================
 Pulling SDK image: openwrt/sdk:x86-64-22.03.7
 Building uu-booster package...
-Building luci-app-uu-booster package...
 
 =========================================
 Build complete!
@@ -50,7 +49,6 @@ Build complete!
 
 Built packages are in: ./output
 -rw-r--r-- 1 user user 45K Jan 18 10:00 uu-booster_1.0.0-1_all.ipk
--rw-r--r-- 1 user user 12K Jan 18 10:00 luci-app-uu-booster_1.0.0-1_all.ipk
 ```
 
 **Note:** Packages are architecture-independent (`_all.ipk`). The UU booster binary is automatically downloaded at install-time based on the router's detected architecture.
@@ -98,19 +96,17 @@ You can test the generic packages on any architecture:
 
 Output:
 ```
-=========================================
+ =========================================
 Testing packages on x86_64 rootfs
 =========================================
-Found packages:
+Found package:
   - uu-booster_1.0.0-1_all.ipk
-  - luci-app-uu-booster_1.0.0-1_all.ipk
 
 Pulling OpenWRT rootfs: openwrt/rootfs:x86_64
 
 Installing packages...
 Updating package lists...
 Installing uu-booster...
-Installing luci-app-uu-booster...
 
 Verifying installation...
 
@@ -124,9 +120,6 @@ version=9.2.10
 
 Checking init script:
 -rwxr-xr-x 1 root root 218 Jan 18 10:00 /etc/init.d/uu-booster
-
-Checking LuCI files:
-LuCI files installed
 
 =========================================
 Installation test PASSED!
@@ -233,7 +226,7 @@ Edit `.github/workflows/build.yml`:
   uses: openwrt/gh-action-sdk@v10
   env:
     ARCH: x86_64-23.05.0  # Change version
-    PACKAGES: uu-booster luci-app-uu-booster
+    PACKAGES: uu-booster
     V: s
 ```
 
@@ -317,9 +310,8 @@ docker image prune -a
 git clone https://github.com/openwrt/openwrt.git
 cd openwrt
 
-# Copy packages
+ # Copy package
 cp -r ../uu-booster/packages/uu-booster package/
-cp -r ../uu-booster/packages/luci-app-uu-booster package/
 
 # Update feeds
 ./scripts/feeds update -a
@@ -332,9 +324,8 @@ make -j$(nproc)
 
 ### Create Custom Firmware with UU Booster
 
-```bash
+ ```bash
 # In OpenWRT menuconfig, select:
-# LuCI -> Applications -> luci-app-uu-booster
 # Network -> uu-booster
 
 # Build firmware

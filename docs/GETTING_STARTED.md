@@ -20,9 +20,8 @@ Or trigger the workflow manually:
 3. Click "Run workflow"
 4. Select branch and click "Run workflow"
 
-The compiled `.ipk` files will be in the `bin/packages/` directory:
-- `uu-booster_1.0.0-1_all.ipk` - Generic main package
-- `luci-app-uu-booster_1.0.0-1_all.ipk` - Generic web interface package
+The compiled `.ipk` file will be in the `bin/packages/` directory:
+- `uu-booster_1.0.0-1_all.ipk` - Generic package
 
 **Note:** These are architecture-independent packages. The correct UU booster binary is downloaded automatically during installation based on your router's architecture.
 
@@ -40,45 +39,11 @@ Test packages in an OpenWRT Docker container on any platform:
 ./scripts/test.sh mipsel
 ```
 
-## Documentation
-
-Start here to understand the full project:
-
-1. **docs/IMPLEMENTATION.md** - Complete summary of what was created
-2. **README.md** - Main project documentation
-3. **docs/BUILD_GUIDE.md** - Detailed build instructions
-
-## What's Included
-
-### Two OpenWRT Packages
-
-1. **uu-booster** - Main package that downloads and manages the UU booster binary
-   - Downloads architecture-specific binary at install time
-   - Supports: aarch64, arm, mipsel, x86_64
-   - Includes init script and update utilities
-
-2. **luci-app-uu-booster** - Web interface for managing the booster
-   - Check for updates
-   - View current version
-   - Update to latest version
-   - View service status
-
-### Build Tools
-
-- **test.sh** - Test packages on any OpenWRT rootfs
-- **quick-start.sh** - Interactive menu
-- **validate.sh** - Validate all project files
-
-### CI/CD
-
-- **.github/workflows/build.yml** - GitHub Actions workflow for automatic builds
-
-### Documentation
+ ## Documentation
 
 - **README.md** - Main guide
 - **docs/BUILD_GUIDE.md** - Build instructions and troubleshooting
 - **docs/PROJECT_SUMMARY.md** - Complete overview
-- **docs/IMPLEMENTATION.md** - Implementation summary
 
 ## Architecture Support
 

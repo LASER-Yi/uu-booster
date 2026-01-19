@@ -19,11 +19,11 @@
 ./scripts/test.sh arm       # Test on ARM v7 (requires QEMU)
 ./scripts/test.sh mipsel    # Test on MIPS (requires QEMU)
 
-# The test script:
-# - Builds Docker containers with OpenWRT rootfs
-# - Installs uu-booster and luci-app-uu-booster packages
-# - Verifies binary, config, init scripts, and LuCI files are present
-# - No unit tests - integration testing only via package installation
+ # The test script:
+ # - Builds Docker containers with OpenWRT rootfs
+ # - Installs uu-booster package
+ # - Verifies binary, config, and init scripts are present
+ # - No unit tests - integration testing only via package installation
 ```
 
 ### Local Testing on Router
@@ -68,39 +68,8 @@ uu restart            # Restart service
   ```bash
   logger -t uu -p daemon.info "message"
   ```
-- **Quoting**: Double-quote all variable expansions to prevent word splitting
-- **Comments**: Minimal, only for section headers or complex logic
-
-### Lua (luasrc/**/*.lua)
-- **Module declaration**: `module("luci.controller.uu-booster", package.seeall)`
-- **Indentation**: TABS (not spaces)
-- **Functions**: snake_case names
-  ```lua
-  function action_check_version()
-  function action_update()
-  ```
-- **Variables**: lowercase `local` declarations
-  ```lua
-  local arch = luci.sys.exec(...)
-  local result = { success = false, message = "" }
-  ```
-- **HTTP responses**: Always prepare content type first
-  ```lua
-  luci.http.prepare_content("application/json")
-  luci.http.write_json(data)
-  ```
-- **Error handling**: Check for empty/nil responses, return error objects
-  ```lua
-  if api_response == "" then
-      luci.http.write_json({ success = false, error = "message" })
-      return
-  end
-  ```
-- **Pattern matching**: Use `match()` for string extraction
-  ```lua
-  local download_url = api_response:match("\"url\":\"([^\"]+)\"")
-  local version = download_url:match("/v([%d%.]+)/")
-  ```
+ - **Quoting**: Double-quote all variable expansions to prevent word splitting
+ - **Comments**: Minimal, only for section headers or complex logic
 
 ### Makefiles (*/Makefile)
 - **Standard OpenWRT package format**
@@ -115,25 +84,7 @@ uu restart            # Restart service
   $(INSTALL_DIR) $(1)/etc/init.d
   $(INSTALL_BIN) ./files/script $(1)/etc/init.d/script
   ```
-- **Architecture**: Set `PKGARCH:=all` for architecture-independent packages
-
-### HTML Templates (htdocs/**/*.htm)
-- **CSS class names**: hyphenated, prefix with `uu-booster-`
-  ```css
-  .uu-booster-container { ... }
-  .uu-booster-button.primary { ... }
-  ```
-- **JavaScript**: camelCase functions, `var` for compatibility
-  ```javascript
-  function checkVersion() { ... }
-  function updateBooster() { ... }
-  ```
-- **XHR**: Use LuCI's XHR wrapper for AJAX
-  ```javascript
-  XHR.get(url, null, successCallback, errorCallback)
-  ```
-- **Localization**: Use `<%:Text%>` for translatable strings
-- **Error display**: Show messages in div with success/error/info classes
+ - **Architecture**: Set `PKGARCH:=all` for architecture-independent packages
 
 ### Init Scripts (files/*.init)
 - **Procd format**: `USE_PROCD=1` required
@@ -148,12 +99,11 @@ uu restart            # Restart service
   procd_close_instance
   ```
 
-### Naming Conventions
-- **Packages**: hyphenated lowercase (uu-booster, luci-app-uu-booster)
-- **Files**: hyphenated or underscored (uu-booster.init, uu-update)
-- **Functions**: snake_case in shell/Lua
-- **Variables**: UPPERCASE constants, lowercase locals
-- **CSS classes**: hyphenated with component prefix
+ ### Naming Conventions
+ - **Packages**: hyphenated lowercase (uu-booster)
+ - **Files**: hyphenated or underscored (uu-booster.init, uu-update)
+ - **Functions**: snake_case in shell/Lua
+ - **Variables**: UPPERCASE constants, lowercase locals
 
 ### Error Handling
 - Shell: Check exit codes, use `error_exit()` helper
@@ -161,13 +111,11 @@ uu restart            # Restart service
 - Init scripts: Use `|| true` to suppress errors where appropriate
 - Always log errors to system logger for debugging
 
-### File Locations
-- **Binaries**: `/usr/sbin/uu/uuplugin`
-- **Config**: `/usr/sbin/uu/uu.conf`
-- **Init scripts**: `/etc/init.d/uu-booster`
-- **UCI defaults**: `/etc/uci-defaults/90-uu-booster-firewall`
-- **LuCI controller**: `/usr/lib/lua/luci/controller/uu-booster.lua`
-- **LuCI model**: `/usr/lib/lua/luci/model/cbi/uu-booster.lua`
+ ### File Locations
+ - **Binaries**: `/usr/sbin/uu/uuplugin`
+ - **Config**: `/usr/sbin/uu/uu.conf`
+ - **Init scripts**: `/etc/init.d/uu-booster`
+ - **UCI defaults**: `/etc/uci-defaults/90-uu-booster-firewall`
 
 ### Important Notes
 - This is an embedded systems project - avoid unnecessary dependencies

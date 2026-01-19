@@ -21,20 +21,13 @@ curl ... | sed -n 's/.*"url":"\([^"]*\)".*/\1/p'
 # ✅ WORKS - extracts URL from JSON
 ```
 
-## Files Fixed
+ ## Files Fixed
 
 ### 1. Main Package Makefile
 **File:** `packages/uu-booster/Makefile:71`
 
 ```bash
 DOWNLOAD_URL=$$(curl -s "http://router.uu.163.com/api/plugin?type=openwrt-$$UU_ARCH" | sed -n 's/.*"url":"\([^"]*\)".*/\1/p')
-```
-
-### 2. LuCI Controller
-**File:** `packages/luci-app-uu-booster/luasrc/controller/uu-booster.lua:22,93`
-
-```lua
-local download_url = luci.sys.exec("curl -s 'http://router.uu.163.com/api/plugin?type=openwrt-" .. uu_arch .. "' | sed -n 's/.*\"url\":\"\\([^\"]*\\)\".*/\\1/p'")
 ```
 
 ## New Scripts Added
