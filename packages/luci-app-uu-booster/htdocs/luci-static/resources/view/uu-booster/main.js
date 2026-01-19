@@ -1,6 +1,6 @@
 'use strict';
 'require view';
-'require request';
+'require rpc';
 'require poll';
 'require dom';
 
@@ -8,6 +8,12 @@ return view.extend({
 	render: function() {
 		let statusDiv, versionSpan, latestSpan, updateBtn, checkBtn;
 		let pollHandle;
+		const rpc = luci.rpc.declare({
+			object: 'luci-app-uu-booster',
+			method: 'uu-booster',
+			params: ['name'],
+			expect: { status: {}, check_version: {}, update: {} }
+		});
 		
 		let container = E('div', { 'class': 'cbi-section' }, [
 			E('h2', {}, [_('UU Game Booster')]),
@@ -82,10 +88,7 @@ return view.extend({
 		checkBtn.textContent = _('Checking...');
 		updateBtn.disabled = true;
 		
-		return L.request.get(L.url('admin/services/uu-booster/check_version'))
-			.then(function(res) {
-				return res.json();
-			})
+		return rpc('check_version')
 			.then(function(data) {
 				checkBtn.disabled = false;
 				checkBtn.textContent = _('Check for Updates');
@@ -124,10 +127,7 @@ return view.extend({
 		let messageBox = document.getElementById('message-box');
 		messageBox.style.display = 'none';
 		
-		return L.request.post(L.url('admin/services/uu-booster/uu-update'))
-			.then(function(res) {
-				return res.json();
-			})
+		return rpc('update')
 			.then(function(data) {
 				updateBtn.disabled = false;
 				updateBtn.textContent = _('Update to Latest');
@@ -152,10 +152,7 @@ return view.extend({
 		let statusDiv = document.getElementById('status-text').parentNode;
 		let statusText = document.getElementById('status-text');
 		
-		return L.request.get(L.url('admin/services/uu-booster/status'))
-			.then(function(res) {
-				return res.json();
-			})
+		return rpc('status')
 			.then(function(data) {
 				if (data.current_version) {
 					document.getElementById('current-version').textContent = data.current_version;

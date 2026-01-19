@@ -1,0 +1,24 @@
+{
+	"luci-app-uu-booster": {
+		"description": "Grant access to uu-booster procedures",
+		"read": {
+			"ubus": {
+				"luci-app-uu-booster": ["status", "check_version"]
+			},
+			"file": {
+				"/etc/openwrt_release": ["read"],
+				"/usr/sbin/uu/uu.conf": ["read"]
+			},
+			"uci": []
+		},
+		"write": {
+			"ubus": {
+				"luci-app-uu-booster": ["update"]
+			},
+			"file": {
+				"/usr/bin/uu": ["exec"]
+			},
+			"uci": []
+		}
+	}
+}
