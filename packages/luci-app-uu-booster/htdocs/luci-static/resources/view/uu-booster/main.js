@@ -9,25 +9,25 @@ return view.extend({
 		let statusDiv, versionSpan, latestSpan, updateBtn, checkBtn;
 		let pollHandle;
 		const rpcStatus = rpc.declare({
-		object: 'luci-app-uu-booster',
-		method: 'status',
-		params: [],
-		expect: { current_version: '', service_status: '' }
-	});
+			object: 'luci-app-uu-booster',
+			method: 'status',
+			params: [],
+			expect: { current_version: '', service_status: '' }
+		});
 
-	const rpcCheckVersion = rpc.declare({
-		object: 'luci-app-uu-booster',
-		method: 'check_version',
-		params: [],
-		expect: { success: false, latest_version: '', error: '' }
-	});
+		const rpcCheckVersion = rpc.declare({
+			object: 'luci-app-uu-booster',
+			method: 'check_version',
+			params: [],
+			expect: { success: false, latest_version: '', error: '' }
+		});
 
-	const rpcUpdate = rpc.declare({
-		object: 'luci-app-uu-booster',
-		method: 'update',
-		params: [],
-		expect: { success: false, message: '' }
-	});
+		const rpcUpdate = rpc.declare({
+			object: 'luci-app-uu-booster',
+			method: 'update',
+			params: [],
+			expect: { success: false, message: '' }
+		});
 		
 		let container = E('div', { 'class': 'cbi-section' }, [
 			E('h2', {}, [_('UU Game Booster')]),
