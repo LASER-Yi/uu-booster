@@ -31,7 +31,7 @@ jobs:
       env:
         ARCH: ${{ matrix.arch }}-${{ matrix.sdk }}
         FEEDNAME: packages_ci
-        FEED_DIR: packages/
+        FEED_DIR: ${{ github.workspace }}/packages
         PACKAGES: uu-booster luci-app-uu-booster
         NO_SHFMT_CHECK: 1
         MAKEFLAGS: -j$(nproc)
