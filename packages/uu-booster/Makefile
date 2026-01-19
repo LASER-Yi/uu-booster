@@ -72,7 +72,9 @@ define Package/uu-booster/postrm
 	echo "Removing UU Booster..."
 	echo ""
 
-	/etc/init.d/uu-booster stop || true
+	if [ -f /etc/init.d/uu-booster ]; then
+		/etc/init.d/uu-booster stop || true
+	fi
 	if [ -f /usr/sbin/uu/.uuplugin_uuid ]; then
 		mkdir -p /etc/uu
 		cp /usr/sbin/uu/.uuplugin_uuid /etc/uu/.uuplugin_uuid
