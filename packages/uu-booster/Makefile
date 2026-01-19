@@ -11,7 +11,7 @@ define Package/uu-booster
   CATEGORY:=Network
   TITLE:=UU Game Booster OpenWRT Unofficial Support
   DEPENDS:=+kmod-tun
-  MAINTAINER:=LASER-Yi
+  MAINTAINER:=LASER-Yi <liangyi0007@gmail.com>
   URL:=https://github.com/LASER-Yi/uu-booster
   PKGARCH:=all
 endef
