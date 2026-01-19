@@ -27,6 +27,22 @@ cleanup() {
 
 trap cleanup EXIT
 
+backup_uuid() {
+	if [ -f "$UU_UPDATE_BINARY_DIR/.uuplugin_uuid" ]; then
+		mkdir -p /etc/uu
+		cp "$UU_UPDATE_BINARY_DIR/.uuplugin_uuid" /etc/uu/.uuplugin_uuid
+		info_message "UUID backed up to /etc/uu/.uuplugin_uuid"
+	fi
+}
+
+restore_uuid() {
+	if [ -f /etc/uu/.uuplugin_uuid ]; then
+		mkdir -p "$UU_UPDATE_BINARY_DIR"
+		cp /etc/uu/.uuplugin_uuid "$UU_UPDATE_BINARY_DIR/.uuplugin_uuid"
+		info_message "UUID restored from /etc/uu/.uuplugin_uuid"
+	fi
+}
+
 get_installed_version() {
 	if [ -f "$UU_UPDATE_BINARY_DIR/uu.conf" ]; then
 		grep '^version=' "$UU_UPDATE_BINARY_DIR/uu.conf" 2>/dev/null | cut -d'=' -f2
@@ -152,6 +168,7 @@ install_files() {
 	fi
 	
 	chmod +x "$UU_UPDATE_BINARY_DIR/$UU_UPDATE_BINARY"
+	restore_uuid
 	
 	info_message "Files installed successfully"
 }
@@ -304,6 +321,8 @@ main() {
 	mkdir -p "$UU_UPDATE_TEMP_DIR"
 	
 	local archive_file="$UU_UPDATE_TEMP_DIR/uu-booster.tar.gz"
+	
+	backup_uuid
 	
 	if download_file "$download_url" "$archive_file" "$expected_md5" "primary"; then
 		info_message "Download successful from primary URL"
