@@ -33,6 +33,6 @@ uci set firewall.uu_to_lan.dest='lan'
 
 # Commit and reload firewall
 uci commit firewall
-/etc/init.d/firewall reload
+/etc/init.d/firewall reload >/dev/null 2>&1
 
 exit 0

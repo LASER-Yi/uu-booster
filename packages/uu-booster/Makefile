@@ -43,25 +43,49 @@ define Package/uu-booster/postinst
 
 	echo "UU Booster package installed"
 	echo ""
-	echo "Please run 'uu update' to download and install the UU Booster binary"
-	echo ""
-	echo "After installation, enable and start the service:"
-	echo "  /etc/init.d/uu-booster enable"
-	echo "  /etc/init.d/uu-booster start"
+	echo "Configuring firewall rules..."
+	# Firewall rules configured by uci-defaults script
+
+	echo "Downloading and installing UU Booster binary..."
+	if /usr/bin/uu update >/dev/null 2>&1; then
+		echo "Binary installed successfully"
+		echo ""
+		echo "Enabling and starting uu-booster service..."
+		/etc/init.d/uu-booster enable
+		if /etc/init.d/uu-booster start; then
+			echo "Service started successfully"
+		else
+			logger -t uu-booster "Failed to start uu-booster service"
+			echo "WARNING: Failed to start uu-booster service"
+		fi
+		echo ""
+		echo "UU Booster is now running!"
+	else
+		logger -t uu-booster "Failed to download UU Booster binary"
+		echo "WARNING: Failed to download UU Booster binary"
+		echo "Run 'uu update' manually to retry"
+	fi
 endef
 
 define Package/uu-booster/postrm
 #!/bin/sh
+	echo "Removing UU Booster..."
+	echo ""
+
 	/etc/init.d/uu-booster stop || true
 	rm -rf /usr/sbin/uu
 
 	if uci get firewall.uu >/dev/null 2>&1; then
+		echo "Removing firewall rules..."
 		uci delete firewall.uu
 		uci delete firewall.lan_to_uu 2>/dev/null || true
 		uci delete firewall.uu_to_lan 2>/dev/null || true
 		uci commit firewall
-		/etc/init.d/firewall reload
+		/etc/init.d/firewall reload >/dev/null 2>&1
+		echo "Firewall rules removed"
 	fi
+
+	echo "UU Booster removed successfully"
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))
