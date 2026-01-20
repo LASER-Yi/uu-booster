@@ -55,7 +55,7 @@ return view.extend({
 					update_available: update_available ? _('Update Available') : _('No update'),
 				},
 				actions: {
-					update: update_available,
+					update: update_available || !running_status,
 					start: !running_status,
 					stop: running_status,
 					restart: running_status,
