@@ -64,9 +64,13 @@ case "$1" in
 	list)
 	json_init
 	json_add_object "get_status"
+	json_close_object
 	json_add_object "execute_update"
+	json_close_object
 	json_add_object "start_service"
+	json_close_object
 	json_add_object "stop_service"
+	json_close_object
 	json_add_object "restart_service"
 	json_close_object
 	json_dump
@@ -75,23 +79,16 @@ case "$1" in
 	call)
 	case "$2" in
 		get_status)
-		local available=0
-		if check_network; then
-			available=1
-		fi
-
 		json_init
-		json_add_boolean "available" "$available"
 		json_add_string "installed_version" "$(get_installed_version)"
-		json_add_int "running_status" "$(is_running)"
-		json_add_string "status_text" "$(/usr/bin/uu status 2>&1 || echo 'unavailable')"
+		json_add_boolean "running_status" "$(is_running)"
 		json_add_boolean "update_available" "$(check_update_available)"
 		json_dump
 		;;
 
 		execute_update)
-		local output=$(/usr/bin/uu update 2>&1)
-		local exit_code=$?
+		output=$(/usr/bin/uu update 2>&1)
+		exit_code=$?
 
 		json_init
 		json_add_int "exit_code" "$exit_code"
@@ -100,8 +97,8 @@ case "$1" in
 		;;
 
 		start_service)
-		local output=$(/etc/init.d/uu-booster start 2>&1)
-		local exit_code=$?
+		output=$(/etc/init.d/uu-booster start 2>&1)
+		exit_code=$?
 
 		json_init
 		json_add_int "exit_code" "$exit_code"
@@ -110,8 +107,8 @@ case "$1" in
 		;;
 
 		stop_service)
-		local output=$(/etc/init.d/uu-booster stop 2>&1)
-		local exit_code=$?
+		output=$(/etc/init.d/uu-booster stop 2>&1)
+		exit_code=$?
 
 		json_init
 		json_add_int "exit_code" "$exit_code"
@@ -120,8 +117,8 @@ case "$1" in
 		;;
 
 		restart_service)
-		local output=$(/etc/init.d/uu-booster restart 2>&1)
-		local exit_code=$?
+		output=$(/etc/init.d/uu-booster restart 2>&1)
+		exit_code=$?
 
 		json_init
 		json_add_int "exit_code" "$exit_code"

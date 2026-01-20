@@ -1,6 +1,7 @@
 'use strict';
 'require form';
 'require rpc';
+'require view';
 'require ui';
 
 const callGetStatus = rpc.declare({
@@ -37,123 +38,87 @@ return view.extend({
 	load: function() {
 		return callGetStatus().catch(function(e) {
 			return {
-				available: false,
-				installed_version: '',
-				running_status: 0,
-				status_text: 'RPC service unavailable',
-				update_available: false
+				status: {
+					version: _('Not installed'),
+					running: false,
+					update_available: false
+				},
+				actions: {}
+			};
+		}).then(function(data) {
+			const running_status = !!data.running_status;
+			const update_available = !!data.update_available;
+			return {
+				status: {
+					version: data.installed_version || _('Not installed'),
+					running: running_status,
+					update_available: update_available ? _('Update Available') : _('No update'),
+				},
+				actions: {
+					update: update_available,
+					start: !running_status,
+					stop: running_status,
+					restart: running_status,
+				}
 			};
 		});
 	},
 
 	render: function(data) {
 		var m, s, o;
-		var disabledAttr = data.available ? {} : { 'disabled': 'disabled' };
 
-		m = new form.Map(null, _('UU Game Booster'));
+		m = new form.JSONMap(data, _('UU Game Booster'));
 
-		s = m.section(form.NamedSection, null, null, _('Status'));
-		s.render = function() {
-			var version = data.installed_version || 'Not installed';
-			var running = data.running_status === 1;
-			var updateAvailable = data.update_available;
+		s = m.section(form.TypedSection, 'status', _('Status'));
+		s.anonymous = true;
+		o = s.option(form.Flag, 'running', _('Running'));
+		o.readonly = true;
+		o = s.option(form.DummyValue, 'version', _('Installed Version'));
+		o = s.option(form.DummyValue, 'update_available', _('Update'))
 
-			return E('div', { 'class': 'cbi-section-node' }, [
-				E('div', { 'style': 'display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 20px 0;' }, [
-					E('div', { 'style': 'padding: 15px; background-color: #f5f5f5; border-radius: 4px;' }, [
-						E('h4', { 'style': 'margin: 0 0 10px 0; color: #616161;' }, _('Installed Version')),
-						E('div', { 'style': 'font-size: 16px; font-weight: 500;' }, version)
-					]),
-					E('div', { 'style': 'padding: 15px; background-color: #f5f5f5; border-radius: 4px;' }, [
-						E('h4', { 'style': 'margin: 0 0 10px 0; color: #616161;' }, _('Running Status')),
-						E('div', {}, running 
-							? E('span', { 'style': 'color: #00c853; font-weight: 500;' }, _('Running'))
-							: E('span', { 'style': 'color: #d32f2f; font-weight: 500;' }, _('Stopped'))
-						)
-					]),
-					E('div', { 'style': 'padding: 15px; background-color: #f5f5f5; border-radius: 4px;' }, [
-						E('h4', { 'style': 'margin: 0 0 10px 0; color: #616161;' }, _('Update Status')),
-						E('div', {}, updateAvailable
-							? E('span', { 'style': 'color: #ff9800; font-weight: 500;' }, _('Update Available'))
-							: E('span', { 'style': 'color: #757575;' }, _('Up to date'))
-						)
-					])
-				])
-			]);
-		};
+		s = m.section(form.TypedSection, 'actions', _('Services'));
+		s.anonymous = true;
+		o = s.option(form.Button, 'update_available', _(''))
+		o.title = '&#160;';
+		o.inputtitle = _('Update');
+		o.readonly = !data.actions.update;
+		o.inputstyle = 'action';
+		o.onclick = L.bind(function(ev) {
+			return callExecuteUpdate()
+				.then(L.bind(m.load, m))
+				.then(L.bind(m.render, m))
+		});
+		o = s.option(form.Button, 'start');
+		o.title = '&#160;';
+		o.readonly = !data.actions.start;
+		o.inputtitle = _('Start');
+		o.inputstyle = 'action';
+		o.onclick = L.bind(function(ev) {
+			return callStartService()
+				.then(L.bind(m.load, m))
+				.then(L.bind(m.render, m))
+		});
 
-		s = m.section(form.NamedSection, null, null, _('Service Control'));
-		s.render = function() {
-			return E('div', { 'class': 'cbi-section-node' }, [
-				E('div', { 'style': 'display: flex; flex-wrap: wrap; gap: 10px;' }, [
-					E('button', Object.assign({
-						'class': 'cbi-button cbi-button-action',
-						'click': ui.createHandlerFn(this, function(ev) {
-							var btn = ev.target;
-							btn.disabled = true;
-
-							return callExecuteUpdate().then(function(result) {
-								ui.showModal(_('Update Complete'), [
-									E('div', { 'style': 'max-height: 400px; overflow-y: auto; background-color: #f5f5f5; padding: 15px; border-radius: 4px; margin: 15px 0;' }, [
-										E('pre', { 'style': 'white-space: pre-wrap; font-family: monospace; margin: 0;' }, result.output || 'No output')
-									]),
-									E('div', { 'style': 'text-align: right; margin-top: 15px;' }, [
-										E('button', {
-											'class': 'cbi-button cbi-button-positive',
-											'click': function() {
-												ui.hideModal();
-												location.reload();
-											}
-										}, _('Done'))
-									])
-								]);
-							}).always(function() {
-								btn.disabled = false;
-							});
-						})
-					}), _('Update')),
-					E('button', Object.assign({
-						'class': 'cbi-button',
-						'click': ui.createHandlerFn(this, function(ev) {
-							var btn = ev.target;
-							btn.disabled = true;
-
-							return callStartService().then(function() {
-								location.reload();
-							}).always(function() {
-								btn.disabled = false;
-							});
-						})
-					}, disabledAttr), _('Start')),
-					E('button', Object.assign({
-						'class': 'cbi-button',
-						'click': ui.createHandlerFn(this, function(ev) {
-							var btn = ev.target;
-							btn.disabled = true;
-
-							return callStopService().then(function() {
-								location.reload();
-							}).always(function() {
-								btn.disabled = false;
-							});
-						})
-					}, disabledAttr), _('Stop')),
-					E('button', Object.assign({
-						'class': 'cbi-button',
-						'click': ui.createHandlerFn(this, function(ev) {
-							var btn = ev.target;
-							btn.disabled = true;
-
-							return callRestartService().then(function() {
-								location.reload();
-							}).always(function() {
-								btn.disabled = false;
-							});
-						})
-					}, disabledAttr), _('Restart'))
-				])
-			]);
-		};
+		o = s.option(form.Button, 'stop');
+		o.title = '&#160;';
+		o.readonly = !data.actions.stop;
+		o.inputtitle = _('Stop');
+		o.inputstyle = 'action';
+		o.onclick = L.bind(function(ev) {
+			return callStopService()
+				.then(L.bind(m.load, m))
+				.then(L.bind(m.render, m))
+		});
+		o = s.option(form.Button, 'restart');
+		o.title = '&#160;';
+		o.readonly = !data.actions.restart;
+		o.inputtitle = _('Restart');
+		o.inputstyle = 'action';
+		o.onclick = L.bind(function(ev) {
+			return callRestartService()
+				.then(L.bind(m.load, m))
+				.then(L.bind(m.render, m))
+		});
 
 		return m.render();
 	},
