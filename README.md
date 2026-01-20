@@ -15,6 +15,7 @@ UU Game Booster OpenWRT 管理工具 - 非官方实现
 - **故障恢复** - 主备 URL 自动切换，下载失败自动重试
 - **服务管理** - 集成 OpenWRT procd 服务管理
 - **防火墙配置** - 自动配置必要的防火墙规则
+- **网页管理** - 通过 LuCI 网页界面查看状态和管理服务
 - ⚠️ **测试说明** - 仅在 OpenWRT 24.10.1 上测试通过，其他版本可能需要适配
 
 ## 支持的设备
@@ -26,7 +27,7 @@ UU Game Booster OpenWRT 管理工具 - 非官方实现
 
 ## 快速安装
 
-### 方法 1：LuCI 网页界面安装（最简单）
+### 方法 1：LuCI 网页界面安装
 
 1. 登录 OpenWRT 路由器的 LuCI 网页界面（通常是 http://192.168.1.1）
 2. 进入 "系统" → "软件包"
@@ -35,7 +36,11 @@ UU Game Booster OpenWRT 管理工具 - 非官方实现
 5. 点击 "安装"
 6. 安装完成后，服务会自动启动
 
-### 方法 2：从 GitHub Releases 安装（推荐）
+![UU Booster LuCI 网页界面](docs/images/luci.png)
+
+可选：安装 `luci-app-uu-booster_*.ipk` 包后，可在 "服务" → "UU Game Booster" 页面查看状态和管理服务。
+
+### 方法 2：从 GitHub Releases 安装
 
 ⚠️ **注意**：本项目仅在 OpenWRT 24.10.1 上测试通过。如果您在其他版本遇到问题，请提交 Issue。
 

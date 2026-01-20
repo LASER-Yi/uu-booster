@@ -38,41 +38,29 @@ After workflow completes:
 Output:
 ```
  =========================================
-Building generic packages
-=========================================
-Pulling SDK image: openwrt/sdk:x86-64-22.03.7
-Building uu-booster package...
+ Building generic packages
+ =========================================
+ Pulling SDK image: openwrt/sdk:x86-64-22.03.7
+ Building uu-booster package...
+ Building luci-app-uu-booster package...
 
-=========================================
-Build complete!
-=========================================
+ =========================================
+ Build complete!
+ =========================================
 
-Built packages are in: ./output
--rw-r--r-- 1 user user 45K Jan 18 10:00 uu-booster_1.0.0-1_all.ipk
+ Built packages are in: ./output
+ -rw-r--r-- 1 user user 45K Jan 18 10:00 uu-booster_1.0.0-1_all.ipk
+ -rw-r--r-- 1 user user 12K Jan 18 10:00 luci-app-uu-booster_1.0.0-1_all.ipk
 ```
 
 **Note:** Packages are architecture-independent (`_all.ipk`). The UU booster binary is automatically downloaded at install-time based on the router's detected architecture.
 
-## Method 2: GitHub Actions
+### Packages Built
 
-### Automatic Builds
-
-Push to GitHub and workflow will automatically build the generic packages.
-
-### Manual Triggers
-
-1. Go to Actions tab in GitHub
-2. Select "Build UU Booster Packages" workflow
-3. Click "Run workflow"
-4. Select branch and click "Run workflow"
-
-### Download Artifacts
-
-After workflow completes:
-1. Go to Actions tab
-2. Select workflow run
-3. Scroll down to "Artifacts" section
-4. Download the `uu-booster` artifact
+| Package | Description | Required |
+|---------|-------------|----------|
+| `uu-booster_*.ipk` | Core package with CLI and service management | Yes |
+| `luci-app-uu-booster_*.ipk` | Optional LuCI web interface | No |
 
 ## Testing Packages
 
@@ -97,33 +85,40 @@ You can test the generic packages on any architecture:
 Output:
 ```
  =========================================
-Testing packages on x86_64 rootfs
-=========================================
-Found package:
-  - uu-booster_1.0.0-1_all.ipk
+ Testing packages on x86_64 rootfs
+ =========================================
+ Found packages:
+   - uu-booster_1.0.0-1_all.ipk
+   - luci-app-uu-booster_1.0.0-1_all.ipk
 
-Pulling OpenWRT rootfs: openwrt/rootfs:x86_64
+ Pulling OpenWRT rootfs: openwrt/rootfs:x86_64
 
-Installing packages...
-Updating package lists...
-Installing uu-booster...
+ Installing packages...
+ Updating package lists...
+ Installing uu-booster...
+ Installing luci-app-uu-booster...
 
-Verifying installation...
+ Verifying installation...
 
-Checking binary:
-Binary exists
+ Checking binary:
+ Binary exists
 
-Checking config:
-Config file exists:
-version=9.2.10
-...
+ Checking config:
+ Config file exists:
+ version=9.2.10
+ ...
 
-Checking init script:
--rwxr-xr-x 1 root root 218 Jan 18 10:00 /etc/init.d/uu-booster
+ Checking init script:
+ -rwxr-xr-x 1 root root 218 Jan 18 10:00 /etc/init.d/uu-booster
 
-=========================================
-Installation test PASSED!
-=========================================
+ Checking LuCI interface:
+ - /usr/libexec/rpcd/uu-booster exists
+ - /usr/share/luci/menu.d/luci-app-uu-booster.json exists
+ - /usr/share/rpcd/acl.d/luci-app-uu-booster.json exists
+
+ =========================================
+ Installation test PASSED!
+ =========================================
 ```
 
 ## Architecture Support
@@ -226,7 +221,7 @@ Edit `.github/workflows/build.yml`:
   uses: openwrt/gh-action-sdk@v10
   env:
     ARCH: x86_64-23.05.0  # Change version
-    PACKAGES: uu-booster
+    PACKAGES: uu-booster luci-app-uu-booster
     V: s
 ```
 
@@ -249,6 +244,7 @@ git clean -fdx
 ```bash
 # 1. Make changes to package files
 vim packages/uu-booster/Makefile
+vim packages/luci-app-uu-booster/Makefile
 
 # 2. Commit and push changes (triggers CI)
 git add .

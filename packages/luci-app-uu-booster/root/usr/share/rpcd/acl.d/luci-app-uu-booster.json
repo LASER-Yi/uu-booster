@@ -1,0 +1,22 @@
+{
+  "luci-app-uu-booster": {
+    "description": "Grant access to UU Booster RPC",
+    "read": {
+      "ubus": {
+        "uu-booster": [
+          "get_status"
+        ]
+      }
+    },
+    "write": {
+      "ubus": {
+        "uu-booster": [
+          "execute_update",
+          "start_service",
+          "stop_service",
+          "restart_service"
+        ]
+      }
+    }
+  }
+}

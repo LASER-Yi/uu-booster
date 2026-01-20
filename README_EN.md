@@ -15,6 +15,7 @@ This project provides a convenient management solution for UU Game Booster on Op
 - **Failover Support** - Automatic fallback to backup URL, retry on failure
 - **Service Management** - Integrated with OpenWRT procd
 - **Firewall Configuration** - Automatic firewall rule setup
+- **Web Management** - View status and manage service via LuCI web interface
 - ⚠️ **Testing Disclaimer** - Only tested on OpenWRT 24.10.1, other versions may require adaptation
 
 ## Supported Devices
@@ -26,7 +27,7 @@ This project provides a convenient management solution for UU Game Booster on Op
 
 ## Quick Installation
 
-### Method 1: LuCI Web Interface (Easiest)
+### Method 1: LuCI Web Interface
 
 1. Log in to your OpenWRT router's LuCI web interface (usually http://192.168.1.1)
 2. Navigate to "System" → "Software"
@@ -35,7 +36,11 @@ This project provides a convenient management solution for UU Game Booster on Op
 5. Click "Install"
 6. The service will start automatically after installation completes
 
-### Method 2: From GitHub Releases (Recommended)
+![UU Booster LuCI Web Interface showing service status, version info, update button, and service control buttons](docs/images/luci.png)
+
+Optional: After installing `luci-app-uu-booster_*.ipk`, you can view status and manage the service at "Services" → "UU Game Booster".
+
+### Method 2: From GitHub Releases
 
 ⚠️ **Note**: This project has only been tested on OpenWRT 24.10.1. If you encounter issues on other versions, please open an Issue.
 

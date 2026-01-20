@@ -33,7 +33,7 @@ jobs:
       env:
         ARCH: ${{ matrix.arch }}-${{ matrix.sdk }}
         FEEDNAME: packages_ci
-        PACKAGES: uu-booster
+        PACKAGES: uu-booster luci-app-uu-booster
         MAKEFLAGS: -j$(nproc)
         V: s
 

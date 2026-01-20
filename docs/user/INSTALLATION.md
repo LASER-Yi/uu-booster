@@ -24,27 +24,52 @@ This project has been tested and confirmed to work on OpenWRT 24.10.1. Other ver
 
 **Step 1: Download the package**
 
-Visit the [GitHub Releases](https://github.com/LASER-Yi/uu-booster/releases) page and download the latest `uu-booster_*.ipk` package.
+Visit the [GitHub Releases](https://github.com/LASER-Yi/uu-booster/releases) page and download the latest packages:
+- `uu-booster_*.ipk` - Core package (required)
+- `luci-app-uu-booster_*.ipk` - Optional web interface
 
 **Step 2: Transfer to router**
 
-Use SCP or WinSCP to transfer the package to your router:
+Use SCP or WinSCP to transfer the packages to your router:
 
 ```bash
 # Example using scp
 scp uu-booster_*.ipk root@192.168.1.1:/tmp/
+scp luci-app-uu-booster_*.ipk root@192.168.1.1:/tmp/
 ```
 
-**Step 3: Install the package**
+**Step 3: Install the packages**
 
 SSH into your router and install:
 
 ```bash
 ssh root@192.168.1.1
 
-# Install the package
+# Install core package (required)
 opkg install /tmp/uu-booster_*.ipk
+
+# Install web interface (optional, for LuCI management)
+opkg install /tmp/luci-app-uu-booster_*.ipk
 ```
+
+### Method 2: LuCI Web Interface
+
+**Step 1: Download packages**
+
+Download both packages from [GitHub Releases](https://github.com/LASER-Yi/uu-booster/releases):
+- `uu-booster_*.ipk`
+- `luci-app-uu-booster_*.ipk`
+
+**Step 2: Upload and install via LuCI**
+
+1. Log in to your OpenWRT router's LuCI web interface
+2. Navigate to "System" → "Software"
+3. Click "Upload package"
+4. Select `uu-booster_*.ipk` and upload
+5. Click "Install"
+6. Repeat for `luci-app-uu-booster_*.ipk`
+
+![UU Booster LuCI Installation - Service status, version display, update button, and service control buttons in web interface](../../docs/images/luci.png)
 
 ### Method 2: Build from Source
 

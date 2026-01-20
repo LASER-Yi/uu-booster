@@ -1,177 +1,11 @@
 #!/bin/sh
 UU_UPDATE_VERSION="1.0.0"
 
-UU_UPDATE_BINARY_DIR="/usr/sbin/uu"
-UU_UPDATE_BINARY="uuplugin"
-UU_UPDATE_TEMP_DIR="/tmp/uu-booster-update-$(date +%s)"
-
-log_message() {
-	logger -t uu -p daemon.info "$1"
-	echo "$1"
-}
-
-error_exit() {
-	log_message "ERROR: $1"
-	exit 1
-}
-
-info_message() {
-	log_message "INFO: $1"
-}
-
-cleanup() {
-	if [ -d "$UU_UPDATE_TEMP_DIR" ]; then
-		rm -rf "$UU_UPDATE_TEMP_DIR" 2>/dev/null
-	fi
-}
-
-trap cleanup EXIT
-
-backup_uuid() {
-	if [ -f "$UU_UPDATE_BINARY_DIR/.uuplugin_uuid" ]; then
-		mkdir -p /etc/uu
-		cp "$UU_UPDATE_BINARY_DIR/.uuplugin_uuid" /etc/uu/.uuplugin_uuid
-		info_message "UUID backed up to /etc/uu/.uuplugin_uuid"
-	fi
-}
-
-restore_uuid() {
-	if [ -f /etc/uu/.uuplugin_uuid ]; then
-		mkdir -p "$UU_UPDATE_BINARY_DIR"
-		cp /etc/uu/.uuplugin_uuid "$UU_UPDATE_BINARY_DIR/.uuplugin_uuid"
-		info_message "UUID restored from /etc/uu/.uuplugin_uuid"
-	fi
-}
-
-get_installed_version() {
-	if [ -f "$UU_UPDATE_BINARY_DIR/uu.conf" ]; then
-		grep '^version=' "$UU_UPDATE_BINARY_DIR/uu.conf" 2>/dev/null | cut -d'=' -f2
-	else
-		echo ""
-	fi
-}
-
-get_installed_md5() {
-	if [ -f "$UU_UPDATE_BINARY_DIR/.md5" ]; then
-		cat "$UU_UPDATE_BINARY_DIR/.md5" 2>/dev/null
-	else
-		echo ""
-	fi
-}
-
-save_installed_md5() {
-	local md5="$1"
-	echo "$md5" > "$UU_UPDATE_BINARY_DIR/.md5" 2>/dev/null
-}
-
-check_arch() {
-	local arch=$1
-	local uu_arch=""
-	
-	case "$arch" in
-		aarch64_*)
-			uu_arch="aarch64"
-			;;
-		arm_*)
-			uu_arch="arm"
-			;;
-		mips_*)
-			uu_arch="mipsel"
-			;;
-		x86_64)
-			uu_arch="x86_64"
-			;;
-		*)
-			error_exit "Unsupported architecture: $arch"
-			;;
-	esac
-	
-	echo "$uu_arch"
-}
-
-download_file() {
-	local url="$1"
-	local output="$2"
-	local expected_md5="$3"
-	local attempt_name="$4"
-	
-	info_message "Download attempt $attempt_name: $url"
-	
-	wget -q -O "$output" "$url"
-	
-	if [ $? -ne 0 ]; then
-		error_exit "Download failed (exit code: $?)"
-	fi
-	
-	if [ ! -f "$output" ]; then
-		error_exit "Downloaded file not found"
-	fi
-	
-	local file_size=$(wc -c "$output" 2>/dev/null | awk '{print $1}')
-	if [ -z "$file_size" ] || [ "$file_size" -lt 1024 ]; then
-		error_exit "Downloaded file too small (${file_size:-0} bytes), possibly error page"
-	fi
-	
-	info_message "Downloaded file size: $file_size bytes"
-	
-	if [ -n "$expected_md5" ] && [ "$expected_md5" != "none" ]; then
-		local calculated_md5=$(md5sum "$output" | awk '{print $1}')
-		
-		if [ -z "$calculated_md5" ]; then
-			error_exit "Failed to calculate MD5 checksum"
-		fi
-		
-		info_message "MD5 Check:"
-		info_message "  Expected: $expected_md5"
-		info_message "  Calculated: $calculated_md5"
-		
-		if [ "$calculated_md5" = "$expected_md5" ]; then
-			info_message "MD5 checksum: OK"
-		else
-			error_exit "MD5 checksum mismatch!"
-		fi
-	else
-		info_message "MD5 validation skipped (no expected MD5 provided)"
-	fi
-	
-	return 0
-}
-
-extract_archive() {
-	local archive="$1"
-	local extract_dir="$UU_UPDATE_TEMP_DIR/extracted"
-	
-	info_message "Extracting archive: $archive"
-	
-	mkdir -p "$extract_dir"
-	
-	tar -xzf "$archive" -C "$extract_dir"
-	
-	if [ $? -ne 0 ]; then
-		error_exit "Failed to extract archive"
-	fi
-	
-	return 0
-}
-
-install_files() {
-	local extract_dir="$UU_UPDATE_TEMP_DIR/extracted"
-	
-	info_message "Installing files to $UU_UPDATE_BINARY_DIR"
-	
-	mkdir -p "$UU_UPDATE_BINARY_DIR"
-	
-	cp -r "$extract_dir"/* "$UU_UPDATE_BINARY_DIR/"
-	
-	if [ $? -ne 0 ]; then
-		error_exit "Failed to copy files"
-	fi
-	
-	chmod +x "$UU_UPDATE_BINARY_DIR/$UU_UPDATE_BINARY"
-	restore_uuid
-	
-	info_message "Files installed successfully"
-}
+if [ -f /usr/lib/uu-common ]; then
+	. /usr/lib/uu-common
+else
+	error_exit "Shared library /usr/lib/uu-common not found"
+fi
 
 stop_service() {
 	if [ -f /etc/init.d/uu-booster ]; then
@@ -234,7 +68,7 @@ main() {
 		echo "Current architecture: $arch"
 		echo "UU architecture: $uu_arch"
 		echo ""
-		
+
 		local installed_version=$(get_installed_version)
 		if [ -n "$installed_version" ]; then
 			echo "Current installed version: $installed_version"
@@ -242,24 +76,24 @@ main() {
 			echo "Current installed version: not installed"
 		fi
 		echo ""
-		
+
 		info_message "Querying UU API for $uu_arch..."
-		
-		local api_response=$(curl -s "http://router.uu.163.com/api/plugin?type=openwrt-$uu_arch" 2>&1)
-		
-		if [ -z "$api_response" ]; then
-			error_exit "No response from UU API"
+
+		local api_info=$(get_uu_api_info "$arch")
+
+		if [ -z "$api_info" ]; then
+			error_exit "Failed to get API information"
 		fi
-		
-		local expected_md5=$(echo "$api_response" | sed -n 's/.*"md5":"\([^"]*\)".*/\1/p' 2>/dev/null)
-		local download_url=$(echo "$api_response" | sed -n 's/.*"url":"\([^"]*\)".*/\1/p' 2>/dev/null)
-		
+
+		local expected_md5=$(echo "$api_info" | cut -d'|' -f3)
+		local download_url=$(echo "$api_info" | cut -d'|' -f1)
+
 		if [ -z "$download_url" ]; then
 			error_exit "Failed to extract download URL from API response"
 		fi
-		
+
 		local installed_md5=$(get_installed_md5)
-		
+
 		if [ "$installed_md5" = "$expected_md5" ]; then
 			echo "You already have the latest version installed."
 			echo "No update needed."
@@ -294,36 +128,36 @@ main() {
 		echo "Use '$0 --help' for usage information"
 		exit 1
 	fi
-	
+
 	echo "Updating UU Booster..."
 	echo ""
-	
+
 	info_message "Querying UU API for $uu_arch..."
-	
-	local api_response=$(curl -s "http://router.uu.163.com/api/plugin?type=openwrt-$uu_arch" 2>&1)
-	
-	if [ -z "$api_response" ]; then
-		error_exit "No response from UU API"
+
+	local api_info=$(get_uu_api_info "$arch")
+
+	if [ -z "$api_info" ]; then
+		error_exit "Failed to get API information"
 	fi
-	
-	local expected_md5=$(echo "$api_response" | sed -n 's/.*"md5":"\([^"]*\)".*/\1/p' 2>/dev/null)
-	local download_url=$(echo "$api_response" | sed -n 's/.*"url":"\([^"]*\)".*/\1/p' 2>/dev/null)
-	local download_url_bak=$(echo "$api_response" | sed -n 's/.*"url_bak":"\([^"]*\)".*/\1/p' 2>/dev/null)
-	
+
+	local download_url=$(echo "$api_info" | cut -d'|' -f1)
+	local download_url_bak=$(echo "$api_info" | cut -d'|' -f2)
+	local expected_md5=$(echo "$api_info" | cut -d'|' -f3)
+
 	if [ -z "$download_url" ]; then
 		error_exit "Failed to extract download URL from API response"
 	fi
-	
+
 	if [ -z "$expected_md5" ]; then
 		info_message "MD5 validation not available, proceeding without checksum"
 	fi
-	
+
 	mkdir -p "$UU_UPDATE_TEMP_DIR"
-	
+
 	local archive_file="$UU_UPDATE_TEMP_DIR/uu-booster.tar.gz"
-	
+
 	backup_uuid
-	
+
 	if download_file "$download_url" "$archive_file" "$expected_md5" "primary"; then
 		info_message "Download successful from primary URL"
 	else
@@ -331,7 +165,7 @@ main() {
 			error_exit "Primary download failed and no backup URL available"
 		else
 			info_message "Primary URL failed, trying backup URL..."
-			
+
 			if download_file "$download_url_bak" "$archive_file" "$expected_md5" "backup"; then
 				info_message "Download successful from backup URL"
 			else

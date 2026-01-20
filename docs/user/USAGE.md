@@ -99,6 +99,48 @@ The update process:
 
 If the update fails, the service will continue running with the previous version.
 
+## LuCI Web Interface
+
+The `luci-app-uu-booster` package provides a web interface for managing UU Booster through OpenWRT's LuCI interface.
+
+### Accessing the Web Interface
+
+1. Log in to your OpenWRT router's LuCI web interface
+2. Navigate to **Services** → **UU Game Booster**
+
+![UU Booster LuCI Interface - Service status, version display, update button with modal, and service control buttons in web interface](../../docs/images/luci.png)
+
+### Features
+
+The web interface displays:
+
+- **Service Status**: Shows whether the UU Booster service is running or stopped
+- **Installed Version**: Displays the currently installed UU plugin version
+- **Update Available**: Indicates if a newer version is available
+
+### Available Operations
+
+The following actions can be performed from the web interface:
+
+| Button | Action |
+|--------|--------|
+| **Update** | Downloads and installs the latest UU plugin version. Shows progress in a modal dialog with script output |
+| **Start** | Starts the UU Booster service |
+| **Stop** | Stops the UU Booster service |
+| **Restart** | Restarts the UU Booster service |
+
+### Update Process
+
+When clicking the Update button:
+1. A modal dialog appears showing the update script output
+2. The update process runs and displays progress
+3. Upon completion, a "Done" button appears
+4. Click "Done" to close the modal and refresh the page
+
+### Service Control
+
+The Start, Stop, and Restart buttons immediately execute the corresponding action and refresh the page to show the updated status.
+
 ## Configuration
 
 ### Configuration File Location

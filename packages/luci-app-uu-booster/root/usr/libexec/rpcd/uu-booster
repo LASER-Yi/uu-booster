@@ -1,0 +1,130 @@
+#!/bin/sh
+
+. /usr/share/libubox/jshn.sh
+
+if [ -f /usr/lib/uu-common ]; then
+	. /usr/lib/uu-common
+else
+	json_init
+	json_add_string "error" "Shared library not found"
+	json_dump
+	exit 1
+fi
+
+is_running() {
+	if [ -f /etc/init.d/uu-booster ]; then
+		/etc/init.d/uu-booster status 2>&1 | grep -q "running" && echo "1" || echo "0"
+	else
+		echo "0"
+	fi
+}
+
+check_network() {
+	curl -s --connect-timeout 5 http://router.uu.163.com/api/plugin >/dev/null 2>&1
+	return $?
+}
+
+check_update_available() {
+	if ! check_network; then
+		echo "0"
+		return
+	fi
+
+	local installed_md5=$(get_installed_md5)
+
+	if [ -z "$installed_md5" ]; then
+		echo "1"
+		return
+	fi
+
+	local arch=$(grep '^DISTRIB_ARCH' /etc/openwrt_release 2>/dev/null | awk -F "'" '{print $2}')
+
+	if [ -z "$arch" ]; then
+		echo "0"
+		return
+	fi
+
+	local api_info=$(get_uu_api_info "$arch")
+
+	if [ -z "$api_info" ]; then
+		echo "0"
+		return
+	fi
+
+	local latest_md5=$(echo "$api_info" | cut -d'|' -f3)
+
+	if [ "$installed_md5" = "$latest_md5" ]; then
+		echo "0"
+	else
+		echo "1"
+	fi
+}
+
+case "$1" in
+	list)
+	json_init
+	json_add_object "get_status"
+	json_close_object
+	json_add_object "execute_update"
+	json_close_object
+	json_add_object "start_service"
+	json_close_object
+	json_add_object "stop_service"
+	json_close_object
+	json_add_object "restart_service"
+	json_close_object
+	json_dump
+	;;
+
+	call)
+	case "$2" in
+		get_status)
+		json_init
+		json_add_string "installed_version" "$(get_installed_version)"
+		json_add_boolean "running_status" "$(is_running)"
+		json_add_boolean "update_available" "$(check_update_available)"
+		json_dump
+		;;
+
+		execute_update)
+		output=$(/usr/bin/uu update 2>&1)
+		exit_code=$?
+
+		json_init
+		json_add_int "exit_code" "$exit_code"
+		json_add_string "output" "$output"
+		json_dump
+		;;
+
+		start_service)
+		output=$(/etc/init.d/uu-booster start 2>&1)
+		exit_code=$?
+
+		json_init
+		json_add_int "exit_code" "$exit_code"
+		json_add_string "output" "$output"
+		json_dump
+		;;
+
+		stop_service)
+		output=$(/etc/init.d/uu-booster stop 2>&1)
+		exit_code=$?
+
+		json_init
+		json_add_int "exit_code" "$exit_code"
+		json_add_string "output" "$output"
+		json_dump
+		;;
+
+		restart_service)
+		output=$(/etc/init.d/uu-booster restart 2>&1)
+		exit_code=$?
+
+		json_init
+		json_add_int "exit_code" "$exit_code"
+		json_add_string "output" "$output"
+		json_dump
+		;;
+	esac
+	;;
+esac
