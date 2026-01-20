@@ -1,5 +1,5 @@
 #!/bin/sh
-UU_UPDATE_VERSION="1.0.0"
+UU_UPDATE_VERSION="1.0.1"
 
 if [ -f /usr/lib/uu-common ]; then
 	. /usr/lib/uu-common
