@@ -30,10 +30,12 @@ define Package/uu-booster/install
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_DIR) $(1)/etc/uci-defaults
 	$(INSTALL_DIR) $(1)/usr/bin
+	$(INSTALL_DIR) $(1)/usr/lib
 	$(INSTALL_DIR) $(1)/usr/sbin
 	$(INSTALL_DIR) $(1)/usr/sbin/uu
 	$(INSTALL_BIN) ./files/uu-booster.init $(1)/etc/init.d/uu-booster
 	$(INSTALL_BIN) ./files/uu $(1)/usr/bin/uu
+	$(INSTALL_BIN) ./files/uu-common $(1)/usr/lib/uu-common
 	$(INSTALL_BIN) ./files/90-uu-booster-firewall $(1)/etc/uci-defaults/90-uu-booster-firewall
  endef
 
