@@ -51,38 +51,38 @@ uu restart            # Restart service
 
 ## Code Style Guidelines
 
-### Shell Scripts (files/*.sh, files/*)
+### Shell Scripts (scripts/*.sh, files/*)
 - **Shebang**: `#!/bin/sh` for POSIX compatibility, `#!/bin/bash` for bashisms
 - **Indentation**: TABS (not spaces), 1 tab = 4 spaces visually
 - **Functions**: snake_case names, lowercase with underscores
-  ```bash
+  ```sh
   log_message() { ... }
   error_exit() { ... }
   ```
 - **Variables**: UPPERCASE for constants, lowercase for local variables
-  ```bash
+  ```sh
   UU_UPDATE_VERSION="1.0.0"
   local arch=$1
   ```
 - **Error handling**: Use `set -e` at script start, explicit exit codes
-  ```bash
+  ```sh
   if [ $? -ne 0 ]; then
       error_exit "Download failed"
   fi
   ```
 - **Logging**: Use `logger` for system logs, `echo` for console
-  ```bash
+  ```sh
   logger -t uu -p daemon.info "message"
   ```
 - **Cleanup**: Always define cleanup function with trap
-  ```bash
+  ```sh
   cleanup() { rm -rf "$TEMP_DIR" 2>/dev/null; }
   trap cleanup EXIT
   ```
 - **Quoting**: Double-quote all variable expansions to prevent word splitting
 - **Comments**: Minimal, only for section headers or complex logic
 
-### Makefiles (*/Makefile)
+### Makefiles (packages/*/Makefile)
 - **Standard OpenWRT package format**
 - **Variables**: UPPERCASE for package metadata
   ```makefile
@@ -129,19 +129,18 @@ uu restart            # Restart service
   /etc/init.d/firewall reload >/dev/null 2>&1
   ```
 
-### Naming Conventions
+## Naming Conventions
 - **Packages**: hyphenated lowercase (uu-booster)
 - **Files**: hyphenated or underscored (uu-booster.init, uu-update)
-- **Functions**: snake_case in shell/Lua
+- **Functions**: snake_case in shell
 - **Variables**: UPPERCASE constants, lowercase locals
 - **UCI sections**: lowercase with underscores (lan_to_uu, uu_to_lan)
 
-### Error Handling
+## Error Handling
 - **Shell**: Check exit codes, use `error_exit()` helper
-- **Lua**: Return error objects with `success` boolean
 - **Init scripts**: Use `|| true` to suppress errors where appropriate
 - **API calls**: Validate response before processing
-  ```bash
+  ```sh
   RESPONSE=$(curl -s "$URL")
   if [ -z "$RESPONSE" ]; then
       error_exit "No response from API"
@@ -149,14 +148,14 @@ uu restart            # Restart service
   ```
 - **Always log errors** to system logger for debugging
 
-### File Locations
+## File Locations
 - **Binaries**: `/usr/sbin/uu/uuplugin`
 - **Config**: `/usr/sbin/uu/uu.conf`
 - **Init scripts**: `/etc/init.d/uu-booster`
 - **UCI defaults**: `/etc/uci-defaults/90-uu-booster-firewall`
 - **UUID backup**: `/etc/uu/.uuplugin_uuid`
 
-### Important Notes
+## Important Notes
 - This is an embedded systems project - avoid unnecessary dependencies
 - Packages are architecture-independent (`_all.ipk`) - binary downloaded at runtime
 - Always test on multiple architectures if making changes
