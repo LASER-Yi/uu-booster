@@ -9,13 +9,34 @@ The project is organized as follows:
 ```
 uu-booster/
 ├── packages/
-│   └── uu-booster/              # Main package
+│   ├── uu-booster/              # Main package
+│   │   ├── Makefile            # OpenWRT package build definition
+│   │   └── files/
+│   │       ├── control         # Package metadata
+│   │       ├── uu-booster.init # Service management script (procd)
+│   │       ├── uu              # Management CLI script
+│   │       ├── uu-common       # Shared library for common functions
+│   │       └── 90-uu-booster-firewall  # UCI firewall configuration
+│   └── luci-app-uu-booster/     # Optional LuCI web interface
 │       ├── Makefile            # OpenWRT package build definition
-│       └── files/
-│           ├── control         # Package metadata
-│           ├── uu-booster.init # Service management script (procd)
-│           ├── uu             # Management CLI script
-│           └── 90-uu-booster-firewall  # UCI firewall configuration
+│       ├── htdocs/
+│       │   └── luci-static/
+│       │       └── resources/
+│       │           └── view/
+│       │               └── uu-booster/
+│       │                   └── overview.js  # Frontend view
+│       └── root/
+│           └── usr/
+│               ├── libexec/
+│               │   └── rpcd/
+│               │       └── uu-booster       # RPC backend
+│               └── share/
+│                   ├── luci/
+│                   │   └── menu.d/
+│                   │       └── luci-app-uu-booster.json  # Menu config
+│                   └── rpcd/
+│                       └── acl.d/
+│                           └── luci-app-uu-booster.json  # ACL permissions
 ├── scripts/
 │   ├── test.sh                # Package installation testing
 │   ├── download-uu.sh         # Manual binary download utility
@@ -120,7 +141,12 @@ When installed, the package places files in these locations:
 | UUID | `/usr/sbin/uu/.uuplugin_uuid` | Device identifier (preserved on reinstall) |
 | Init Script | `/etc/init.d/uu-booster` | Service management script |
 | Management CLI | `/usr/bin/uu` | Command-line interface |
+| Shared Library | `/usr/lib/uu-common` | Common functions for uu and RPC backend |
 | Firewall Defaults | `/etc/uci-defaults/90-uu-booster-firewall` | Initial firewall configuration |
+| RPC Backend | `/usr/libexec/rpcd/uu-booster` | LuCI RPC interface backend |
+| LuCI View | `/usr/share/luci/static/resources/view/uu-booster/overview.js` | Frontend view |
+| Menu Config | `/usr/share/luci/menu.d/luci-app-uu-booster.json` | LuCI menu entry |
+| ACL Config | `/usr/share/rpcd/acl.d/luci-app-uu-booster.json` | RPC permissions |
 
 ### Backup Locations
 
@@ -335,10 +361,9 @@ For local builds, see [BUILD_GUIDE](BUILD_GUIDE.md).
 ### Potential Improvements
 
 1. **nftables Support**: Add support for nftables (OpenWRT 22.03+)
-2. **LuCI Integration**: Web interface for easier management
-3. **Health Monitoring**: Built-in health checks and metrics
-4. **Rollback Support**: Ability to rollback to previous binary version
-5. **Download Cache**: Local cache of downloaded binaries
+2. **Health Monitoring**: Built-in health checks and metrics
+3. **Rollback Support**: Ability to rollback to previous binary version
+4. **Download Cache**: Local cache of downloaded binaries
 
 ### Architecture Expansion
 
